@@ -8,6 +8,7 @@ import warnings
 import argparse
 import shutil
 import os.path as osp
+import os
 
 import torch
 import torch.nn as nn
@@ -30,8 +31,23 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main(args: argparse.Namespace):
+
+    if args.download_dataset_only == "True":
+        current_dir = os.getcwd()
+        
+        path = osp.join(current_dir,'data','pre_cond',str(args.data).lower())
+        if len(path) != 0:
+            dir = os.listdir(path)
+            utils.download_dataset(args)
+        quit()
+        
+
+
+
+
     logger = CompleteLogger(args.log, args.phase)
     print(args)
+    
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -262,5 +278,6 @@ if __name__ == '__main__':
     parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis'],
                         help="When phase is 'test', only test the model."
                              "When phase is 'analysis', only analysis the model.")
+    parser.add_argument("--download-dataset-only", type=str, default= "False",choices=["True","False"], help="Set true if you only want to download pre-transformed dataset.")
     args = parser.parse_args()
     main(args)

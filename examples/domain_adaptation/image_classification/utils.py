@@ -3,9 +3,11 @@
 @contact: JiangJunguang1123@outlook.com, cbx_99_hasta@outlook.com
 """
 import sys
+import os
 import os.path as osp
 import time
 from PIL import Image
+import pickle
 
 import timm
 import torch
@@ -52,6 +54,40 @@ def get_dataset_names():
         name for name in datasets.__dict__
         if not name.startswith("__") and callable(datasets.__dict__[name])
     ) + ['Digits']
+
+#helper function used for downloading pre-transformed datasets
+def download_dataset(args):
+    train_transform = get_train_transform(args.train_resizing, scale=args.scale, ratio=args.ratio,
+                                                random_horizontal_flip=not args.no_hflip,
+                                                random_color_jitter=False, resize_size=args.resize_size,
+                                                norm_mean=args.norm_mean, norm_std=args.norm_std)
+    val_transform = get_val_transform(args.val_resizing, resize_size=args.resize_size,
+                                            norm_mean=args.norm_mean, norm_std=args.norm_std)
+    print("train_transform: ", train_transform)
+    print("val_transform: ", val_transform)
+
+    train_source_dataset, train_target_dataset, val_dataset, test_dataset, num_classes, args.class_names = \
+        get_dataset(args.data, args.root, args.source, args.target, train_transform, val_transform)
+    
+    #tensor_train_source = torch.tensor(train_source_dataset.data)
+    current_dir = os.getcwd()
+    train_source_path = osp.join(current_dir,'data','pre_cond',str(args.data),'train_source.pkl')
+    num_classes_path = osp.join(current_dir,'data','pre_cond',str(args.data),'num_classes.pkl')
+    class_names_path = osp.join(current_dir,'data','pre_cond',str(args.data),'class_names_.pkl')
+
+    for i,data in enumerate(train_source_dataset):
+         torch.save(data, osp.join(current_dir,'data','pre_cond',str(args.data).lower(),'train_source'+str(i)))
+    #torch.save(num_classes, osp.join(current_dir,'data','pre_cond',str(args.data).lower(),"num_classes"))
+    #torch.save(args.class_names, osp.join(current_dir,'data','pre_cond',str(args.data).lower(),"class_names"))
+
+
+   
+
+    
+
+    
+
+    
 
 
 def get_dataset(dataset_name, root, source, target, train_source_transform, val_transform, train_target_transform=None):

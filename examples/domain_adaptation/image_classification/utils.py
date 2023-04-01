@@ -8,6 +8,7 @@ import os.path as osp
 import time
 from PIL import Image
 import pickle
+import numpy as np
 
 import timm
 import torch
@@ -55,6 +56,17 @@ def get_dataset_names():
         if not name.startswith("__") and callable(datasets.__dict__[name])
     ) + ['Digits']
 
+
+
+def save_tuple_as_numpy(data,i,dataset_name,current_dir):
+    tensor_path =  osp.join(current_dir,'data','pre_cond',dataset_name.lower(),'imgs','train_source'+str(i)+".npy")
+    label_path = osp.join(current_dir,'data','pre_cond',dataset_name.lower(),'labels','train_source_label'+str(i)+".npy")
+    tensor, label,int_value = data
+    array = tensor.numpy()
+    array, label,int_value = data
+    np.save(tensor_path, array.numpy(),allow_pickle=True)
+    np.save(label_path, label,allow_pickle=True)
+
 #helper function used for downloading pre-transformed datasets
 def download_dataset(args):
     train_transform = get_train_transform(args.train_resizing, scale=args.scale, ratio=args.ratio,
@@ -74,9 +86,29 @@ def download_dataset(args):
     train_source_path = osp.join(current_dir,'data','pre_cond',str(args.data),'train_source.pkl')
     num_classes_path = osp.join(current_dir,'data','pre_cond',str(args.data),'num_classes.pkl')
     class_names_path = osp.join(current_dir,'data','pre_cond',str(args.data),'class_names_.pkl')
+    data_path = osp.join(current_dir,'data','pre_cond',str(args.data).lower(),'imgs')
+    label_path = osp.join(current_dir,'data','pre_cond',str(args.data).lower(),'labels')
+   
+    
+    #If folder already populated remove tensors
+    if len(os.listdir(data_path)) != 0:
+        for file_name in os.listdir(data_path):
+            try:
+                os.remove(osp.join(data_path,file_name))
+            except Exception as e:
+                print("failed to delete {}. Reason: {}".format(osp.join(data_path,file_name), e))
+        for file_name in os.listdir(label_path):
+            try:
+                os.remove(osp.join(label_path,file_name))
+            except Exception as e:
+                print("failed to delete {}. Reason: {}".format(osp.join(label_path,file_name), e))
 
     for i,data in enumerate(train_source_dataset):
-         torch.save(data, osp.join(current_dir,'data','pre_cond',str(args.data).lower(),'train_source'+str(i)))
+         save_tuple_as_numpy(data,i,str(args.data),current_dir)
+         
+
+             
+        
     #torch.save(num_classes, osp.join(current_dir,'data','pre_cond',str(args.data).lower(),"num_classes"))
     #torch.save(args.class_names, osp.join(current_dir,'data','pre_cond',str(args.data).lower(),"class_names"))
 

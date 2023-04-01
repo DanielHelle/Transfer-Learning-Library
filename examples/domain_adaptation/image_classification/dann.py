@@ -278,6 +278,7 @@ if __name__ == '__main__':
     parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis'],
                         help="When phase is 'test', only test the model."
                              "When phase is 'analysis', only analysis the model.")
-    parser.add_argument("--download-dataset-only", type=str, default= "False",choices=["True","False"], help="Set true if you only want to download pre-transformed dataset.")
+    parser.add_argument("--download-dataset-only", type=str, default= "False",choices=["True","False"], help="Set True if you only want to download pre-transformed dataset.")
+    parser.add_argument("--domain-adaptation",type=str, default= "False",choices=["True","False"], help="Toggle domain adaptation. Set to True if you want to condense pretransformed data for domain adaptation.")
     args = parser.parse_args()
     main(args)

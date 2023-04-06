@@ -53,9 +53,14 @@ class ImageList(datasets.VisionDataset):
         """
         path, target = self.samples[index]
         img = self.loader(path)
+
+       
+       # print("self.transform : {}".format(self.transform))
         if self.transform is not None:
             img = self.transform(img)
         if self.target_transform is not None and target is not None:
+            
+            #print(self.target_transform)
             target = self.target_transform(target)
         return img, target
 

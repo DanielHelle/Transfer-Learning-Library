@@ -1,0 +1,24 @@
+Namespace(root='data/office31', data='Office31', source=['A'], target=['W'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='resnet18', bottleneck_dim=256, no_pool=False, scratch=False, trade_off=1.0, batch_size=32, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=20, iters_per_epoch=1000, print_freq=100, seed=1, per_class_eval=False, log='logs/dann/Office31_A2W', phase='train', download_dataset_only='False', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/res_DC_pre_processed_office31_ConvNet_1ipc.pt')
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py:56: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+Traceback (most recent call last):
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 299, in <module>
+    main(args)
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 87, in main
+    train_source_dataset = utils.get_condensed_source(args.data,args.source,args)
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/utils.py", line 140, in get_condensed_source
+    return CondensedData(condensed_data["data"][0])
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/utils.py", line 34, in __init__
+    self.dataset_list = self.dataset_list
+AttributeError: 'CondensedData' object has no attribute 'dataset_list'

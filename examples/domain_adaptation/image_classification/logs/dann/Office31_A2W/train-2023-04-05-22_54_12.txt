@@ -1,0 +1,166 @@
+Namespace(root='data/office31', data='Office31', source=['A'], target=['W'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='resnet18', bottleneck_dim=256, no_pool=False, scratch=False, trade_off=1.0, batch_size=1, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=20, iters_per_epoch=1000, print_freq=100, seed=1, per_class_eval=False, log='logs/dann/Office31_A2W', phase='train', download_dataset_only='False', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/res_DC_pre_processed_office31_ConvNet_1ipc.pt')
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py:56: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+=> using model 'resnet18'
+tensor([[[ 0.4726,  1.0262,  0.3144,  ...,  0.5188,  0.9295, -0.5597],
+         [ 2.0374,  1.6976,  1.7344,  ...,  1.1957,  1.9961,  1.6483],
+         [ 0.7603,  1.3996,  0.8043,  ...,  1.3160,  1.3314,  1.2384],
+         ...,
+         [ 1.1581,  1.3372,  1.2171,  ...,  1.0849,  1.1541,  1.3567],
+         [ 1.0519,  2.0017,  1.7389,  ...,  1.8226,  1.7498,  1.8967],
+         [ 0.9111,  1.0943,  0.1517,  ...,  1.1649,  0.5102,  0.7038]],
+
+        [[ 0.3532,  1.3248, -0.0067,  ...,  0.3649,  0.7715,  0.1215],
+         [ 1.4977,  2.0620,  1.8268,  ...,  1.7869,  2.0043,  1.3549],
+         [ 1.2989,  1.7120,  1.3319,  ...,  1.0698,  1.7136,  1.2499],
+         ...,
+         [ 0.7472,  1.7587,  1.2524,  ...,  0.9963,  1.5962,  1.6648],
+         [ 1.7371,  2.1009,  1.7249,  ...,  2.1796,  1.7982,  1.8509],
+         [ 0.7095,  1.0233,  0.2651,  ...,  0.9656,  0.9290,  0.6211]],
+
+        [[ 0.8154,  1.1867,  0.6189,  ...,  0.5562,  1.0813,  0.0893],
+         [ 1.8312,  2.3029,  1.9906,  ...,  1.2542,  2.5839,  1.4297],
+         [ 1.1568,  1.4319,  1.2351,  ...,  1.2277,  1.9060,  1.3342],
+         ...,
+         [ 0.8517,  1.5618,  1.2611,  ...,  1.8697,  1.4868,  1.3103],
+         [ 1.1274,  2.3143,  1.6915,  ...,  1.9764,  2.0853,  2.3687],
+         [ 0.6438,  1.3783,  0.1924,  ...,  0.8583,  0.9862,  0.7320]]])
+tensor([[[-0.0158,  0.8488,  0.7234,  ...,  0.3655,  0.5933,  1.0481],
+         [ 0.8480,  1.8248,  1.3186,  ...,  1.3327,  1.7124,  1.1382],
+         [ 0.4694,  1.5611,  0.7203,  ...,  0.9648,  1.3097,  0.7144],
+         ...,
+         [ 0.7105,  1.5143,  0.9214,  ...,  0.8238,  1.4784,  0.7379],
+         [ 1.0898,  1.9100,  1.2811,  ...,  1.5543,  1.7669,  0.6853],
+         [ 0.4314,  0.9919,  0.2714,  ..., -0.0104,  0.7323,  0.7147]],
+
+        [[-0.4478,  0.8792,  0.6427,  ...,  0.5277,  1.0656,  0.1931],
+         [ 0.9896,  2.1792,  1.3221,  ...,  1.0887,  1.7493,  1.3986],
+         [ 0.8821,  1.4894,  0.8339,  ...,  1.0395,  1.5641,  0.7519],
+         ...,
+         [ 0.4211,  1.5035,  0.9710,  ...,  0.9750,  1.5108,  0.5395],
+         [ 1.1523,  1.8986,  1.2960,  ...,  1.3135,  1.7210,  0.7823],
+         [-0.3106,  0.6556,  0.1018,  ...,  0.1984,  1.3647, -0.1606]],
+
+        [[-0.6243,  1.0125,  0.6623,  ...,  0.4792,  0.5957,  0.4507],
+         [ 1.3653,  2.0553,  1.5528,  ...,  1.5938,  1.8562,  1.2673],
+         [ 1.0607,  1.6853,  1.2101,  ...,  1.1146,  1.4390,  0.5626],
+         ...,
+         [ 0.8264,  1.8067,  1.0125,  ...,  1.0505,  1.5727,  0.4185],
+         [ 1.1830,  1.9797,  1.4639,  ...,  1.4186,  1.8970,  1.2027],
+         [-0.3991,  0.9186,  0.2439,  ...,  0.1394,  0.8806,  0.4747]]])
+tensor(14)
+tensor(6)
+tensor([[[ 0.5962,  0.8743,  0.1575,  ...,  0.2191,  0.9262, -0.2065],
+         [ 0.9529,  1.9000,  1.1937,  ...,  1.4992,  1.6038,  1.0302],
+         [ 0.9413,  1.3856,  0.9823,  ...,  0.8356,  1.2908,  0.0606],
+         ...,
+         [ 0.0040,  1.5447,  0.8831,  ...,  0.8477,  1.0977,  0.5414],
+         [ 1.2891,  1.1407,  1.4544,  ...,  1.5170,  1.6877,  0.7656],
+         [ 0.6880,  0.2677,  0.6167,  ...,  0.1877,  0.4842,  0.1664]],
+
+        [[ 0.6534,  0.7996,  0.0923,  ...,  0.3574,  0.3823, -0.3737],
+         [ 1.0858,  2.0493,  1.4404,  ...,  1.5767,  1.9039,  0.5269],
+         [ 0.2067,  1.5539,  1.1637,  ...,  0.9342,  1.4556,  0.1730],
+         ...,
+         [ 0.2386,  1.7063,  0.5764,  ...,  1.1221,  1.5352,  0.2299],
+         [ 1.3302,  2.0285,  1.4911,  ...,  1.5820,  2.0604,  0.9523],
+         [-0.0835,  0.6615,  0.2704,  ...,  0.4745,  0.7946, -1.0263]],
+
+        [[-0.1203,  0.8482,  0.2894,  ...,  0.1551,  0.6018, -0.1418],
+         [ 1.6691,  1.8286,  1.7833,  ...,  1.5132,  2.4441,  0.8775],
+         [ 0.4723,  1.4931,  1.0993,  ...,  1.1871,  1.6392,  0.4746],
+         ...,
+         [ 0.4063,  1.2692,  0.8939,  ...,  0.9568,  1.5201,  0.2894],
+         [ 1.2509,  2.0096,  1.4668,  ...,  1.7179,  1.9726,  0.6264],
+         [ 0.1472,  0.6368,  0.2688,  ...,  0.1163,  0.9663, -0.8602]]])
+tensor(8)
+tensor([[[ 0.1491,  0.9019,  0.9738,  ...,  0.8063,  0.9209,  0.6837],
+         [ 1.1112,  2.0744,  1.6479,  ...,  1.6911,  2.0435,  0.5254],
+         [ 0.5255,  1.7873,  1.0462,  ...,  0.8157,  1.4250,  1.1898],
+         ...,
+         [ 0.4108,  1.3978,  1.2222,  ...,  1.0460,  1.6606,  1.0631],
+         [ 0.4433,  1.8851,  1.5905,  ...,  1.4465,  1.9811,  0.6724],
+         [-0.4033,  0.8221,  0.9801,  ...,  0.7301,  0.7490,  0.2390]],
+
+        [[-0.8765,  1.2794,  0.8526,  ...,  0.9905,  0.9689,  0.2072],
+         [ 1.1309,  2.0199,  1.5750,  ...,  1.7619,  2.0478,  0.3206],
+         [ 0.3499,  1.8984,  1.0794,  ...,  1.1856,  1.7377,  0.6753],
+         ...,
+         [ 0.1148,  1.6704,  1.1407,  ...,  1.2932,  1.7499,  0.6623],
+         [ 0.3409,  1.7828,  1.7925,  ...,  1.5571,  2.0801,  0.5998],
+         [-0.3888,  0.8400,  0.5261,  ...,  0.7581,  1.3294,  0.3071]],
+
+        [[ 0.2451,  1.0702,  0.6693,  ...,  1.0114,  1.0367, -0.4751],
+         [ 0.9747,  2.2003,  1.8100,  ...,  1.9592,  1.7191,  0.4964],
+         [ 0.5882,  1.9298,  1.1875,  ...,  1.2161,  1.9451,  0.9981],
+         ...,
+         [ 0.3795,  1.6416,  1.4504,  ...,  1.2796,  1.5584,  0.5659],
+         [ 0.3967,  2.1412,  2.1369,  ...,  1.9648,  2.5819,  1.0597],
+         [-0.4479,  1.0822,  0.8689,  ...,  1.0955,  0.8784,  0.0833]]])
+tensor(27)
+lr: 0.001
+Traceback (most recent call last):
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 299, in <module>
+    main(args)
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 146, in main
+    train(train_source_iter, train_target_iter, classifier, domain_adv, optimizer,
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 188, in train
+    x_t, = next(train_target_iter)[:1]
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/tllib-0.4-py3.9.egg/tllib/utils/data.py", line 50, in __next__
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/dataloader.py", line 435, in __next__
+    data = self._next_data()
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/dataloader.py", line 1085, in _next_data
+    return self._process_data(data)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/dataloader.py", line 1111, in _process_data
+    data.reraise()
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/_utils.py", line 428, in reraise
+tensor([[[ 0.3482,  1.1912, -0.5579,  ..., -0.1145,  1.1627, -0.3876],
+         [ 1.0114,  1.9178,  1.6710,  ...,  1.3867,  2.0010,  0.7021],
+         [ 0.3791,  1.3853,  1.0877,  ...,  0.8300,  1.4696,  0.2558],
+         ...,
+         [ 0.6339,  1.8298,  0.8689,  ...,  0.7995,  1.8206,  0.8765],
+         [ 0.2607,  2.2176,  1.2021,  ...,  1.3806,  2.2461, -0.2247],
+         [-1.3560,  0.4026,  0.9245,  ...,  0.2319,  0.3444,  0.5230]],
+
+        [[ 0.7966,  0.5933,  0.4339,  ...,  0.6532,  0.4343, -0.3093],
+         [ 1.3892,  2.2086,  1.5171,  ...,  1.6982,  1.9729,  0.6183],
+         [ 0.0974,  1.5798,  1.0055,  ...,  1.3280,  1.8360,  0.3105],
+         ...,
+         [ 0.8555,  2.0555,  0.9250,  ...,  0.8755,  1.8334,  0.6916],
+         [ 0.5257,  2.4676,  1.4410,  ...,  1.4282,  1.7413,  0.8480],
+         [-0.7005, -0.1330,  0.6718,  ...,  0.0626,  1.1873, -0.5841]],
+
+        [[ 0.7507,  0.4255,  0.1764,  ...,  0.2848,  0.8328, -1.3391],
+         [ 0.8156,  2.4297,  1.7413,  ...,  1.9806,  1.8990,  0.6666],
+         [ 0.5332,  2.0375,  0.9345,  ...,  0.9089,  1.9842,  0.7491],
+         ...,
+         [ 0.3082,  1.7148,  1.3947,  ...,  1.0906,  2.1243,  0.0774],
+         [ 0.1404,  2.7635,  1.6441,  ...,  1.4136,  2.0086,  1.2883],
+         [-0.8160,  0.5969,  0.0596,  ...,  0.2547,  0.8136, -0.2994]]])
+tensor(30)
+    raise self.exc_type(msg)
+TypeError: Caught TypeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/_utils/worker.py", line 198, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/tllib-0.4-py3.9.egg/tllib/vision/datasets/imagelist.py", line 139, in __getitem__
+    return self.domains[dataset_idx][sample_idx] + (self.domain_ids[dataset_idx],)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/tllib-0.4-py3.9.egg/tllib/vision/datasets/imagelist.py", line 57, in __getitem__
+    img = self.transform(img)
+TypeError: 'Namespace' object is not callable
+

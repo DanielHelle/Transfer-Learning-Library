@@ -61,18 +61,37 @@ def main(args: argparse.Namespace):
 
     cudnn.benchmark = True
 
-    # Data loading code
+
+    
     train_transform = utils.get_train_transform(args.train_resizing, scale=args.scale, ratio=args.ratio,
                                                 random_horizontal_flip=not args.no_hflip,
                                                 random_color_jitter=False, resize_size=args.resize_size,
                                                 norm_mean=args.norm_mean, norm_std=args.norm_std)
+
+
+    # Data loading code
+        
     val_transform = utils.get_val_transform(args.val_resizing, resize_size=args.resize_size,
                                             norm_mean=args.norm_mean, norm_std=args.norm_std)
     print("train_transform: ", train_transform)
     print("val_transform: ", val_transform)
 
+    
+      
+   
     train_source_dataset, train_target_dataset, val_dataset, test_dataset, num_classes, args.class_names = \
         utils.get_dataset(args.data, args.root, args.source, args.target, train_transform, val_transform)
+    
+        #train_source_dataset, train_target_dataset, val_dataset, test_dataset, num_classes, args.class_names = \
+         #   utils.get_dataset(args.data, args.root, args.source, args.target,None,val_transform)
+
+    
+    
+    
+    if args.dataset_condensation == "True":
+        train_source_dataset = utils.get_condensed_source(args.data,args.source,args)
+    
+    
     train_source_loader = DataLoader(train_source_dataset, batch_size=args.batch_size,
                                      shuffle=True, num_workers=args.workers, drop_last=True)
     train_target_loader = DataLoader(train_target_dataset, batch_size=args.batch_size,
@@ -129,6 +148,8 @@ def main(args: argparse.Namespace):
     for epoch in range(args.epochs):
         print("lr:", lr_scheduler.get_last_lr()[0])
         # train for one epoch
+        print("LOREMIPSUM")
+        
         train(train_source_iter, train_target_iter, classifier, domain_adv, optimizer,
               lr_scheduler, epoch, args)
 
@@ -171,6 +192,12 @@ def train(train_source_iter: ForeverDataIterator, train_target_iter: ForeverData
     end = time.time()
     for i in range(args.iters_per_epoch):
         x_s, labels_s = next(train_source_iter)[:2]
+
+        #print("PPPPPPPP")
+        #print(labels_s)
+        #print(x_s.size())
+        #print(next(train_target_iter))
+
         x_t, = next(train_target_iter)[:1]
 
         x_s = x_s.to(device)
@@ -279,6 +306,7 @@ if __name__ == '__main__':
                         help="When phase is 'test', only test the model."
                              "When phase is 'analysis', only analysis the model.")
     parser.add_argument("--download-dataset-only", type=str, default= "False",choices=["True","False"], help="Set True if you only want to download pre-transformed dataset.")
-    parser.add_argument("--domain-adaptation",type=str, default= "False",choices=["True","False"], help="Toggle domain adaptation. Set to True if you want to condense pretransformed data for domain adaptation.")
+    parser.add_argument("--dataset-condensation",type=str, default= "False",choices=["True","False"], help="Toggle dataset condensation of source domain data. Set to True if you want to use condensed images, False otherwise.")
+    parser.add_argument("--condensed-data-path", type=str,default="none",help="Set absolut path of condensed data tensor")
     args = parser.parse_args()
     main(args)

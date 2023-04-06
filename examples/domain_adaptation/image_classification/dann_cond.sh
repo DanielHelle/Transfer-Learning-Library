@@ -1,0 +1,2 @@
+#for reproduction this value should be set: --seed 1
+CUDA_VISIBLE_DEVICES=0 python dann.py data/office31 -d Office31 -s A -t W -a resnet18 -b 1 --resize-size 32 --train-resizing res. --val-resizing res. --log logs/dann/Office31_A2W --dataset-condensation True --condensed-data-path /home/daniel/exjobb/DatasetCondensation/result/res_DC_pre_processed_office31_ConvNet_1ipc.pt

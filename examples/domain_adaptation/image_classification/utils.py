@@ -17,6 +17,8 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 from timm.data.auto_augment import auto_augment_transform, rand_augment_transform
 
+from torch.utils.data import Dataset
+
 sys.path.append('../../..')
 import tllib.vision.datasets as datasets
 import tllib.vision.models as models
@@ -24,6 +26,29 @@ from tllib.vision.transforms import ResizeImage
 from tllib.utils.metric import accuracy, ConfusionMatrix
 from tllib.utils.meter import AverageMeter, ProgressMeter
 from tllib.vision.datasets.imagelist import MultipleDomainsDataset
+
+
+class CondensedData(Dataset):
+  #dataset_list is a list with two tensors, dataset_list[0]
+  def __init__(self, dataset_list):
+    self.dataset_list = dataset_list
+      
+    #count labels
+    self.len = len(dataset_list[1])
+    
+
+  def __getitem__(self, index):
+   
+    img = self.dataset_list[0][index]
+    #print(img)
+    label = self.dataset_list[1][index]
+    #print(label)
+
+
+    return img, label
+
+  def __len__(self):
+    return self.len   
 
 
 def get_model_names():
@@ -61,8 +86,8 @@ def get_dataset_names():
 def save_tuple_as_numpy(data,i,dataset_name,current_dir):
     tensor_path =  osp.join(current_dir,'data','pre_cond',dataset_name.lower(),'imgs','train_source'+str(i)+".npy")
     label_path = osp.join(current_dir,'data','pre_cond',dataset_name.lower(),'labels','train_source_label'+str(i)+".npy")
-    tensor, label,int_value = data
-    array = tensor.numpy()
+    #tensor, label,int_value = data
+    #array = tensor.numpy()
     array, label,int_value = data
     np.save(tensor_path, array.numpy(),allow_pickle=True)
     np.save(label_path, label,allow_pickle=True)
@@ -112,14 +137,11 @@ def download_dataset(args):
     #torch.save(num_classes, osp.join(current_dir,'data','pre_cond',str(args.data).lower(),"num_classes"))
     #torch.save(args.class_names, osp.join(current_dir,'data','pre_cond',str(args.data).lower(),"class_names"))
 
-
+def get_condensed_source(dataset_name,source, args):
+    abs_file_path = args.condensed_data_path
+    condensed_data = torch.load(abs_file_path)
+    return CondensedData(condensed_data["data"][0])
    
-
-    
-
-    
-
-    
 
 
 def get_dataset(dataset_name, root, source, target, train_source_transform, val_transform, train_target_transform=None):

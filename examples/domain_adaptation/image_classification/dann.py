@@ -104,7 +104,11 @@ def main(args: argparse.Namespace):
 
     # create model
     print("=> using model '{}'".format(args.arch))
-    backbone = utils.get_model(args.arch, pretrain=not args.scratch)
+    
+    backbone = utils.get_model(args.arch, pretrain=not args.scratch, channel=args.channel,num_classes=num_classes,args = args)
+   # print("FIEMFIEMFIEM")
+    #print(backbone.out_features)
+    #print("PIEMPIEMPIEM")
     pool_layer = nn.Identity() if args.no_pool else None
     classifier = ImageClassifier(backbone, num_classes, bottleneck_dim=args.bottleneck_dim,
                                  pool_layer=pool_layer, finetune=not args.scratch).to(device)
@@ -148,7 +152,7 @@ def main(args: argparse.Namespace):
     for epoch in range(args.epochs):
         print("lr:", lr_scheduler.get_last_lr()[0])
         # train for one epoch
-        print("LOREMIPSUM")
+        #print("LOREMLOREM")
         
         train(train_source_iter, train_target_iter, classifier, domain_adv, optimizer,
               lr_scheduler, epoch, args)
@@ -209,6 +213,8 @@ def train(train_source_iter: ForeverDataIterator, train_target_iter: ForeverData
 
         # compute output
         x = torch.cat((x_s, x_t), dim=0)
+        #print(x.size())
+        #print(model)
         y, f = model(x)
         y_s, y_t = y.chunk(2, dim=0)
         f_s, f_t = f.chunk(2, dim=0)
@@ -263,8 +269,7 @@ if __name__ == '__main__':
     parser.add_argument('--norm-std', type=float, nargs='+',
                         default=(0.229, 0.224, 0.225), help='normalization std')
     # model parameters
-    parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
-                        choices=utils.get_model_names(),
+    parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',#removed arg: choices=utils.get_model_names()
                         help='backbone architecture: ' +
                              ' | '.join(utils.get_model_names()) +
                              ' (default: resnet18)')
@@ -308,5 +313,8 @@ if __name__ == '__main__':
     parser.add_argument("--download-dataset-only", type=str, default= "False",choices=["True","False"], help="Set True if you only want to download pre-transformed dataset.")
     parser.add_argument("--dataset-condensation",type=str, default= "False",choices=["True","False"], help="Toggle dataset condensation of source domain data. Set to True if you want to use condensed images, False otherwise.")
     parser.add_argument("--condensed-data-path", type=str,default="none",help="Set absolut path of condensed data tensor")
+    parser.add_argument("--no-aug", type=str,default="False",help="Define if you want to do data augmentation")
+    parser.add_argument("--channel", type=int, default=3, help="Image channel size, default 3. Only needed to be set for convnet")
+    parser.add_argument("--convnet-weights-data-path", type=str,default="none",help="Set absolut path of convnet weights")
     args = parser.parse_args()
     main(args)

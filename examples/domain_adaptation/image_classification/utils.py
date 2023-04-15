@@ -19,9 +19,12 @@ from timm.data.auto_augment import auto_augment_transform, rand_augment_transfor
 
 from torch.utils.data import Dataset
 
+
 sys.path.append('../../..')
 import tllib.vision.datasets as datasets
 import tllib.vision.models as models
+import custom_model
+#import tllib.vision.models.cnn as cnn
 from tllib.vision.transforms import ResizeImage
 from tllib.utils.metric import accuracy, ConfusionMatrix
 from tllib.utils.meter import AverageMeter, ProgressMeter
@@ -52,15 +55,52 @@ class CondensedData(Dataset):
 
 
 def get_model_names():
+  
     return sorted(
-        name for name in models.__dict__
+        name for name in models.__dict__.keys()
         if name.islower() and not name.startswith("__")
         and callable(models.__dict__[name])
-    ) + timm.list_models()
+    ) + timm.list_models() + custom_model.models
 
+def get_default_convnet_setting():
+    net_width, net_depth, net_act, net_norm, net_pooling = 128, 3, 'relu', 'instancenorm', 'avgpooling'
+    return net_width, net_depth, net_act, net_norm, net_pooling
 
-def get_model(model_name, pretrain=True):
-    if model_name in models.__dict__:
+def compare_backbone_and_loaded_weights(backbone,weights):
+    print("Comparing shapes of ConvNet weights and loaded weights:")
+    for name, param in backbone.named_parameters():
+        if name in weights:
+            loaded_param_shape = weights[name].shape
+            conv_net_param_shape = param.shape
+
+            if loaded_param_shape != conv_net_param_shape:
+                print(f"Shape mismatch: {name}")
+                print(f"  ConvNet shape: {conv_net_param_shape}")
+                print(f"  Loaded shape: {loaded_param_shape}")
+            else:
+                print(f"Shapes match for {name}")
+        else:
+            print(f"{name} not found in loaded weights")
+
+def get_model(model_name, pretrain=True,channel=3,num_classes=10,args = None):
+    
+    print(model_name)
+    if model_name =="convnet":
+        net_width, net_depth, net_act, net_norm, net_pooling = get_default_convnet_setting()
+        backbone = custom_model.convnet(pretrained=False,channel=channel,num_classes=num_classes,net_width=net_width,net_depth=net_depth,net_act=net_act,net_norm=net_norm,net_pooling=net_pooling)
+       
+        #Load weights from dataset condensation to backbone
+        if args.convnet_weights_data_path != "none":
+            weights = torch.load(args.convnet_weights_data_path)
+            with torch.no_grad():
+                #compare_backbone_and_loaded_weights(backbone,weights)
+                #backbone.classifier.weight = nn.Parameter(weights['classifier.weight'])
+                #backbone.classifier.bias = nn.Parameter(weights['classifier.bias'])
+                updated_weights_dict = {k: v for k, v in weights.items() if not k.startswith('classifier')}
+                backbone.load_state_dict(updated_weights_dict,strict=False)
+                
+
+    elif model_name in models.__dict__:
         # load models from tllib.vision.models
         backbone = models.__dict__[model_name](pretrained=pretrain)
     else:
@@ -97,7 +137,7 @@ def download_dataset(args):
     train_transform = get_train_transform(args.train_resizing, scale=args.scale, ratio=args.ratio,
                                                 random_horizontal_flip=not args.no_hflip,
                                                 random_color_jitter=False, resize_size=args.resize_size,
-                                                norm_mean=args.norm_mean, norm_std=args.norm_std)
+                                                norm_mean=args.norm_mean, norm_std=args.norm_std,no_aug=args.no_aug)
     val_transform = get_val_transform(args.val_resizing, resize_size=args.resize_size,
                                             norm_mean=args.norm_mean, norm_std=args.norm_std)
     print("train_transform: ", train_transform)
@@ -233,7 +273,7 @@ def validate(val_loader, model, args, device) -> float:
 
 def get_train_transform(resizing='default', scale=(0.08, 1.0), ratio=(3. / 4., 4. / 3.), random_horizontal_flip=True,
                         random_color_jitter=False, resize_size=224, norm_mean=(0.485, 0.456, 0.406),
-                        norm_std=(0.229, 0.224, 0.225), auto_augment=None):
+                        norm_std=(0.229, 0.224, 0.225), auto_augment=None,no_aug = "False"):
     """
     resizing mode:
         - default: resize the image to 256 and take a random resized crop of size 224;
@@ -262,6 +302,9 @@ def get_train_transform(resizing='default', scale=(0.08, 1.0), ratio=(3. / 4., 4
     else:
         raise NotImplementedError(resizing)
     transforms = [transform]
+    if no_aug == "True":
+        T.Compose(transforms)
+
     if random_horizontal_flip:
         transforms.append(T.RandomHorizontalFlip())
     if auto_augment:

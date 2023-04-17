@@ -90,6 +90,7 @@ def get_model(model_name, pretrain=True,channel=3,num_classes=10,args = None):
         backbone = custom_model.convnet(pretrained=False,channel=channel,num_classes=num_classes,net_width=net_width,net_depth=net_depth,net_act=net_act,net_norm=net_norm,net_pooling=net_pooling)
        
         #Load weights from dataset condensation to backbone
+        #change this so it adapts to the scratch flag
         if args.convnet_weights_data_path != "none":
             weights = torch.load(args.convnet_weights_data_path)
             with torch.no_grad():
@@ -148,11 +149,29 @@ def download_dataset(args):
     
     #tensor_train_source = torch.tensor(train_source_dataset.data)
     current_dir = os.getcwd()
+
+    if not os.path.exists(osp.join(current_dir,'data','pre_cond')):
+ 
+        os.makedirs(osp.join(current_dir,'data','pre_cond'))
+
+    if not os.path.exists(osp.join(current_dir,'data','pre_cond',str(args.data).lower())):
+    
+        os.makedirs(osp.join(osp.join(current_dir,'data','pre_cond',str(args.data).lower())))
+    
+
     train_source_path = osp.join(current_dir,'data','pre_cond',str(args.data),'train_source.pkl')
     num_classes_path = osp.join(current_dir,'data','pre_cond',str(args.data),'num_classes.pkl')
     class_names_path = osp.join(current_dir,'data','pre_cond',str(args.data),'class_names_.pkl')
     data_path = osp.join(current_dir,'data','pre_cond',str(args.data).lower(),'imgs')
     label_path = osp.join(current_dir,'data','pre_cond',str(args.data).lower(),'labels')
+
+    if not os.path.exists(data_path):
+   
+        os.makedirs(data_path)
+
+    if not os.path.exists(label_path):
+   
+        os.makedirs(label_path)
    
     
     #If folder already populated remove tensors

@@ -32,13 +32,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main(args: argparse.Namespace):
 
-    if args.download_dataset_only == "True":
-        current_dir = os.getcwd()
-        
-        path = osp.join(current_dir,'data','pre_cond',str(args.data).lower())
-        if len(path) != 0:
-            dir = os.listdir(path)
-            utils.download_dataset(args)
+    if args.download_dataset_only == "True": 
+        utils.download_dataset(args)
         quit()
         
 
@@ -66,7 +61,7 @@ def main(args: argparse.Namespace):
     train_transform = utils.get_train_transform(args.train_resizing, scale=args.scale, ratio=args.ratio,
                                                 random_horizontal_flip=not args.no_hflip,
                                                 random_color_jitter=False, resize_size=args.resize_size,
-                                                norm_mean=args.norm_mean, norm_std=args.norm_std)
+                                                norm_mean=args.norm_mean, norm_std=args.norm_std,no_aug=args.no_aug)
 
 
     # Data loading code

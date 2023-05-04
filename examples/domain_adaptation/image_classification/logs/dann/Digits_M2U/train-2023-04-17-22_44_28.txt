@@ -1,0 +1,40 @@
+Namespace(root='data/digits', data='Digits', source=['MNIST'], target=['USPS'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, trade_off=1.0, batch_size=1, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=20, iters_per_epoch=1000, print_freq=100, seed=None, per_class_eval=False, log='logs/dann/Digits_M2U', phase='train', download_dataset_only='False', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/res_DC_pre_processed_mnist_ConvNet_1ipc.pt', no_aug='False', channel=3, convnet_weights_data_path='/home/daniel/exjobb/DatasetCondensation/result/state_dict_DC_pre_processed_mnist_ConvNet_1ipc.pt')
+E
+I
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+=> using model 'convnet'
+convnet
+lr: 0.001
+Epoch: [0][   0/1000]	Time  0.06 ( 0.06)	Data  0.00 ( 0.00)	Loss   2.96 (  2.96)	Cls Acc 0.0 (0.0)	Domain Acc 50.0 (50.0)
+Epoch: [0][ 100/1000]	Time  0.06 ( 0.01)	Data  0.05 ( 0.01)	Loss   2.50 (  3.51)	Cls Acc 0.0 (3.0)	Domain Acc 100.0 (97.5)
+Epoch: [0][ 200/1000]	Time  0.05 ( 0.01)	Data  0.04 ( 0.01)	Loss   3.23 (  3.15)	Cls Acc 0.0 (5.5)	Domain Acc 100.0 (98.8)
+Epoch: [0][ 300/1000]	Time  0.06 ( 0.01)	Data  0.05 ( 0.01)	Loss   2.73 (  2.98)	Cls Acc 0.0 (7.6)	Domain Acc 100.0 (98.7)
+Epoch: [0][ 400/1000]	Time  0.05 ( 0.01)	Data  0.04 ( 0.01)	Loss   2.52 (  2.76)	Cls Acc 0.0 (12.2)	Domain Acc 100.0 (99.0)
+Epoch: [0][ 500/1000]	Time  0.05 ( 0.01)	Data  0.04 ( 0.01)	Loss   3.42 (  2.78)	Cls Acc 0.0 (16.0)	Domain Acc 100.0 (96.7)
+Epoch: [0][ 600/1000]	Time  0.05 ( 0.01)	Data  0.04 ( 0.01)	Loss   1.68 (  2.81)	Cls Acc 0.0 (14.3)	Domain Acc 100.0 (97.3)
+Epoch: [0][ 700/1000]	Time  0.05 ( 0.01)	Data  0.04 ( 0.01)	Loss   0.38 (  2.76)	Cls Acc 100.0 (14.1)	Domain Acc 100.0 (97.6)
+Epoch: [0][ 800/1000]	Time  0.05 ( 0.01)	Data  0.04 ( 0.01)	Loss   2.20 (  2.71)	Cls Acc 0.0 (13.9)	Domain Acc 100.0 (97.9)
+Traceback (most recent call last):
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 315, in <module>
+    main(args)
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 152, in main
+    train(train_source_iter, train_target_iter, classifier, domain_adv, optimizer,
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 231, in train
+    optimizer.step()
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/optim/lr_scheduler.py", line 67, in wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/autograd/grad_mode.py", line 26, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/optim/sgd.py", line 99, in step
+    d_p = d_p.add(p, alpha=weight_decay)
+KeyboardInterrupt

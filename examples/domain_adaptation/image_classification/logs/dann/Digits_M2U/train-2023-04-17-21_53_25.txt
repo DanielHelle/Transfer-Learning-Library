@@ -1,0 +1,53 @@
+Namespace(root='data/digits', data='Digits', source=['MNIST'], target=['USPS'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, trade_off=1.0, batch_size=1, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=20, iters_per_epoch=1000, print_freq=100, seed=None, per_class_eval=False, log='logs/dann/Digits_M2U', phase='train', download_dataset_only='False', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/res_DC_pre_processed_mnist_ConvNet_1ipc.pt', no_aug='False', channel=3, convnet_weights_data_path='/home/daniel/exjobb/DatasetCondensation/result/state_dict_DC_pre_processed_mnist_ConvNet_1ipc.pt')
+E
+I
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+=> using model 'convnet'
+convnet
+lr: 0.001
+Traceback (most recent call last):
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 315, in <module>
+    main(args)
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 152, in main
+    train(train_source_iter, train_target_iter, classifier, domain_adv, optimizer,
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 200, in train
+    x_t, = next(train_target_iter)[:1]
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/tllib-0.4-py3.9.egg/tllib/utils/data.py", line 50, in __next__
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/dataloader.py", line 435, in __next__
+    data = self._next_data()
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/dataloader.py", line 1085, in _next_data
+    return self._process_data(data)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/dataloader.py", line 1111, in _process_data
+    data.reraise()
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/_utils.py", line 428, in reraise
+    raise self.exc_type(msg)
+RuntimeError: Caught RuntimeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/_utils/worker.py", line 198, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/tllib-0.4-py3.9.egg/tllib/vision/datasets/digits.py", line 124, in __getitem__
+    img = self.transform(img)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torchvision-0.8.2-py3.9-linux-x86_64.egg/torchvision/transforms/transforms.py", line 67, in __call__
+    img = t(img)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torch-1.7.1-py3.9-linux-x86_64.egg/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torchvision-0.8.2-py3.9-linux-x86_64.egg/torchvision/transforms/transforms.py", line 226, in forward
+    return F.normalize(tensor, self.mean, self.std, self.inplace)
+  File "/home/daniel/miniconda3/envs/transfer/lib/python3.9/site-packages/torchvision-0.8.2-py3.9-linux-x86_64.egg/torchvision/transforms/functional.py", line 284, in normalize
+    tensor.sub_(mean).div_(std)
+RuntimeError: output with shape [1, 32, 32] doesn't match the broadcast shape [3, 32, 32]
+

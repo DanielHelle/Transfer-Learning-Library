@@ -1,0 +1,23 @@
+Namespace(root='data/digits', data='Digits', source=['MNIST'], target=['USPS'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, trade_off=1.0, batch_size=1, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=20, iters_per_epoch=1000, print_freq=100, seed=None, per_class_eval=False, log='logs/dann/Digits_M2U', phase='train', download_dataset_only='False', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/res_DC_pre_processed_mnist_ConvNet_1ipc.pt', no_aug='False', channel=3, convnet_weights_data_path='/home/daniel/exjobb/DatasetCondensation/result/state_dict_DC_pre_processed_mnist_ConvNet_1ipc.pt')
+E
+I
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+=> using model 'convnet'
+Traceback (most recent call last):
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 315, in <module>
+    main(args)
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py", line 103, in main
+    backbone = utils.get_model(args.arch, pretrain=not args.scratch, channel=args.channel,num_classes=num_classes,args = args)
+  File "/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/utils.py", line 86, in get_model
+    if args.source.lower() == "usps" or args.source.lower() == "mnist":
+AttributeError: 'list' object has no attribute 'lower'

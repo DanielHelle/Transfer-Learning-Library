@@ -16,6 +16,7 @@ from torch.optim import SGD
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
+from torch.utils.data import random_split
 
 import utils
 from tllib.self_training.mcc import MinimumClassConfusionLoss, ImageClassifier
@@ -56,6 +57,21 @@ def main(args: argparse.Namespace):
 
     train_source_dataset, train_target_dataset, val_dataset, test_dataset, num_classes, args.class_names = \
         utils.get_dataset(args.data, args.root, args.source, args.target, train_transform, val_transform)
+    
+    train_source_notcond = train_source_dataset
+    train_source_notcond_loader = DataLoader(train_source_notcond, batch_size=args.batch_size,
+                                     shuffle=True, num_workers=args.workers, drop_last=True)
+    
+    if args.dataset_condensation == "True":
+        train_source_dataset = utils.get_condensed_source(args.data,args.source,args)
+    
+    if args.partition_source != -1:
+        total_len = len(train_source_dataset)
+        print("dataset size: ",total_len)
+        train_len = int(args.partition_source * total_len)
+        train_source_dataset, _ = random_split(train_source_dataset, [train_len, total_len - train_len])
+        print("Post partition source dataset size: ",len(train_source_dataset))
+
     train_source_loader = DataLoader(train_source_dataset, batch_size=args.batch_size,
                                      shuffle=True, num_workers=args.workers, drop_last=True)
     train_target_loader = DataLoader(train_target_dataset, batch_size=args.batch_size,
@@ -68,7 +84,7 @@ def main(args: argparse.Namespace):
 
     # create model
     print("=> using model '{}'".format(args.arch))
-    backbone = utils.get_model(args.arch, pretrain=not args.scratch)
+    backbone = utils.get_model(args.arch, pretrain=not args.scratch,args=args)
     pool_layer = nn.Identity() if args.no_pool else None
     classifier = ImageClassifier(backbone, num_classes, bottleneck_dim=args.bottleneck_dim,
                                  pool_layer=pool_layer, finetune=not args.scratch).to(device)
@@ -94,11 +110,16 @@ def main(args: argparse.Namespace):
         target_feature = collect_feature(train_target_loader, feature_extractor, device)
         # plot t-SNE
         tSNE_filename = osp.join(logger.visualize_directory, 'TSNE.pdf')
+
+        '''
         tsne.visualize(source_feature, target_feature, tSNE_filename)
         print("Saving t-SNE to", tSNE_filename)
         # calculate A-distance, which is a measure for distribution discrepancy
         A_distance = a_distance.calculate(source_feature, target_feature, device)
         print("A-distance =", A_distance)
+        '''
+        avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
+        print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
         return
 
     if args.phase == 'test':
@@ -258,5 +279,11 @@ if __name__ == '__main__':
     parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis'],
                         help="When phase is 'test', only test the model."
                              "When phase is 'analysis', only analysis the model.")
+    parser.add_argument("--dataset-condensation",type=str, default= "False",choices=["True","False"], help="Toggle dataset condensation of source domain data. Set to True if you want to use condensed images, False otherwise.")
+    parser.add_argument("--condensed-data-path", type=str,default="none",help="Set absolut path of condensed data tensor")
+    parser.add_argument("--no-aug", type=str,default="False",help="Define if you want to do data augmentation")
+    parser.add_argument("--channel", type=int, default=3, help="Image channel size, default 3. Only needed to be set for convnet")
+    parser.add_argument("--convnet-weights-data-path", type=str,default="none",help="Set absolut path of convnet weights")
+    parser.add_argument("--partition-source", type=float, default=-1, help="partition source training data, effectively discards part of training data")
     args = parser.parse_args()
     main(args)

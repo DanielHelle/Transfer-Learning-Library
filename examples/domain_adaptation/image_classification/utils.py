@@ -9,6 +9,10 @@ import time
 from PIL import Image
 import pickle
 import numpy as np
+import random
+
+import numpy as np
+
 
 import timm
 import torch
@@ -16,8 +20,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as T
 from timm.data.auto_augment import auto_augment_transform, rand_augment_transform
+from tllib.utils.analysis import collect_feature, tsne, a_distance
 
-from torch.utils.data import Dataset
+
+from torch.utils.data import Dataset, ConcatDataset,Subset
+from torch.utils.data import DataLoader
 
 
 sys.path.append('../../..')
@@ -26,10 +33,282 @@ import tllib.vision.models as models
 import custom_model
 #import tllib.vision.models.cnn as cnn
 from tllib.vision.transforms import ResizeImage
-from tllib.utils.metric import accuracy, ConfusionMatrix
+from tllib.utils.metric import accuracy, ConfusionMatrix, binary_accuracy
 from tllib.utils.meter import AverageMeter, ProgressMeter
 from tllib.vision.datasets.imagelist import MultipleDomainsDataset
 
+from torch.utils.data import TensorDataset
+from torch.optim import SGD
+
+
+class ANet(nn.Module):
+    def __init__(self, in_feature):
+        super(ANet, self).__init__()
+        self.layer = nn.Linear(in_feature, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.layer(x)
+        x = self.sigmoid(x)
+        return x
+
+#train_source_feature,val_source_feature, train_target_feature,val_target_feature,
+
+'''
+def calculate(source_feature: torch.Tensor,val_source_feature:torch.Tensor, target_feature: torch.Tensor,val_target_feature: torch.Tensor,
+              device, progress=True, training_epochs=15, patience=2):
+    
+    source_label = torch.ones((source_feature.shape[0], 1))
+    target_label = torch.zeros((target_feature.shape[0], 1))
+    feature = torch.cat([source_feature, target_feature], dim=0)
+    label = torch.cat([source_label, target_label], dim=0)
+
+    dataset = TensorDataset(feature, label)
+    length = len(dataset)
+    train_size = int(0.8 * length)
+    val_size = length - train_size
+    train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
+    train_loader = DataLoader(train_set, batch_size=2, shuffle=True)
+    val_loader = DataLoader(val_set, batch_size=8, shuffle=False)
+
+    anet = ANet(feature.shape[1]).to(device)
+    optimizer = SGD(anet.parameters(), lr=0.01)
+    a_distance = 2.0
+    
+    best_val_loss = float('inf')
+    patience_counter = 0
+
+    for epoch in range(training_epochs):
+        anet.train()
+        for (x, label) in train_loader:
+            x = x.to(device)
+            label = label.to(device)
+            anet.zero_grad()
+            y = anet(x)
+            loss = F.binary_cross_entropy(y, label)
+            loss.backward()
+            optimizer.step()
+
+        anet.eval()
+        meter = AverageMeter("accuracy", ":4.2f")
+        source_val_loss = 0.0
+        source_samples = 0
+        with torch.no_grad():
+            for (x, label) in val_loader:
+                x = x.to(device)
+                label = label.to(device)
+                y = anet(x)
+                acc = binary_accuracy(y, label)
+                meter.update(acc, x.shape[0])
+                
+                # Calculate validation loss for source samples
+                if label.sum().item() > 0:  # If there are source samples in the batch
+                    source_loss = F.binary_cross_entropy(y[label == 1], label[label == 1])
+                    source_val_loss += source_loss.item() * label[label == 1].shape[0]
+                    source_samples += label[label == 1].shape[0]
+
+        source_val_loss /= source_samples
+
+        if progress:
+            print("epoch {} accuracy: {} A-dist: {} Source Val Loss: {}".format(epoch, meter.avg, a_distance, source_val_loss))
+
+        # Check for overfitting on source samples
+        if source_val_loss < best_val_loss:
+            best_val_loss = source_val_loss
+            patience_counter = 0
+        else:
+            patience_counter += 1
+
+        if patience_counter >= patience:
+            print("Early stopping due to overfitting on source samples.")
+            break
+
+        error = 1 - meter.avg / 100
+        a_distance = 2 * (1 - 2 * error)
+
+    return a_distance
+'''
+
+def calculate(train_source_feature: torch.Tensor, val_source_feature: torch.Tensor,
+              train_target_feature: torch.Tensor, val_target_feature: torch.Tensor,
+              device, progress=True, training_epochs=15, patience=2):
+
+    # Concatenate training and validation features
+    train_feature = torch.cat([train_source_feature, train_target_feature], dim=0)
+    val_feature = torch.cat([val_source_feature, val_target_feature], dim=0)
+    
+    # Create labels
+    train_source_label = torch.ones((train_source_feature.shape[0], 1))
+    train_target_label = torch.zeros((train_target_feature.shape[0], 1))
+    
+    val_source_label = torch.ones((val_source_feature.shape[0], 1))
+    val_target_label = torch.zeros((val_target_feature.shape[0], 1))
+    
+    # Concatenate training and validation labels
+    train_label = torch.cat([train_source_label, train_target_label], dim=0)
+    val_label = torch.cat([val_source_label, val_target_label], dim=0)
+    
+    # Create datasets
+    train_set = TensorDataset(train_feature, train_label)
+    val_set = TensorDataset(val_feature, val_label)
+    
+    # Create dataloaders
+    train_loader = DataLoader(train_set, batch_size=2, shuffle=True)
+    val_loader = DataLoader(val_set, batch_size=8, shuffle=False)
+
+    anet = ANet(train_feature.shape[1]).to(device)
+    optimizer = SGD(anet.parameters(), lr=0.01)
+    a_distance = 2.0
+    
+    best_val_loss = float('inf')
+    patience_counter = 0
+
+    for epoch in range(training_epochs):
+        anet.train()
+        for (x, label) in train_loader:
+            x = x.to(device)
+            label = label.to(device)
+            anet.zero_grad()
+            y = anet(x)
+            loss = F.binary_cross_entropy(y, label)
+            loss.backward()
+            optimizer.step()
+
+        anet.eval()
+        meter = AverageMeter("accuracy", ":4.2f")
+        source_val_loss = 0.0
+        source_samples = 0
+        with torch.no_grad():
+            for (x, label) in val_loader:
+                x = x.to(device)
+                label = label.to(device)
+                y = anet(x)
+                acc = binary_accuracy(y, label)
+                meter.update(acc, x.shape[0])
+                
+                # Calculate validation loss for source samples
+                if label.sum().item() > 0:  # If there are source samples in the batch
+                    source_loss = F.binary_cross_entropy(y[label == 1], label[label == 1])
+                    source_val_loss += source_loss.item() * label[label == 1].shape[0]
+                    source_samples += label[label == 1].shape[0]
+
+        source_val_loss /= source_samples
+
+        if progress:
+            print("epoch {} accuracy: {} A-dist: {} Source Val Loss: {}".format(epoch, meter.avg, a_distance, source_val_loss))
+
+        # Check for overfitting on source samples
+        if source_val_loss < best_val_loss:
+            best_val_loss = source_val_loss
+            patience_counter = 0
+        else:
+            patience_counter += 1
+
+        if patience_counter >= patience:
+            print("Early stopping due to overfitting on source samples.")
+            break
+
+        error = 1 - meter.avg / 100
+        a_distance = 2 * (1 - 2 * error)
+
+    return a_distance
+
+'''
+def compute_average_a_distance(source_loader, target_loader, feature_extractor, device, iterations=5):
+
+    num_source_images = len(source_loader.dataset)
+    num_target_images = len(target_loader.dataset)
+
+    # Repeat source dataset to match the size of target dataset
+    repeat_factor = num_target_images // num_source_images + (1 if num_target_images % num_source_images else 0)
+    repeated_source_dataset = ConcatDataset([source_loader.dataset] * repeat_factor)
+    
+    source_rep_dataloader = DataLoader(repeated_source_dataset,batch_size=32,shuffle=True)
+    target_loader = DataLoader(target_loader.dataset,batch_size=32,shuffle=True)
+    print("num_source_images",len(source_rep_dataloader))
+    print("num_target_images",len(target_loader))
+    a_distances = []
+    for _ in range(iterations):
+        # Randomly sample data from target_loader
+
+        source_feature = collect_feature(source_rep_dataloader, feature_extractor, device)
+        
+        target_feature = collect_feature(target_loader, feature_extractor, device)
+        print("SOURCE FEATURE SIZE:",target_feature.size())
+        
+        print("TARGET FEATURE SIZE: ", target_feature.size())
+        
+        A_distance = calculate(source_feature, target_feature, device, True)
+        a_distances.append(A_distance.cpu())
+        
+    # Calculate average and standard deviation of A-distance over all iterations
+    avg_a_distance = np.mean(a_distances)
+    std_dev = np.std(a_distances)
+    return avg_a_distance, std_dev
+'''
+
+def compute_average_a_distance(source_loader, target_loader, feature_extractor, device,args, k=5):
+    
+    num_source_images = len(source_loader.dataset)
+    num_target_images = len(target_loader.dataset)
+    
+    fold_size_source = num_source_images // k
+    fold_size_target = num_target_images // k
+    
+    a_distances = []
+
+    for fold in range(k):
+        
+        # Define the start and end indices for the source and target datasets
+        start_source = fold * fold_size_source
+        end_source = (fold + 1) * fold_size_source
+        start_target = fold * fold_size_target
+        end_target = (fold + 1) * fold_size_target
+
+        # Split datasets into train and validation for this fold
+        train_source_subset = Subset(source_loader.dataset, list(range(0, start_source)) + list(range(end_source, num_source_images)))
+        val_source_subset = Subset(source_loader.dataset, list(range(start_source, end_source)))
+        
+        train_target_subset = Subset(target_loader.dataset, list(range(0, start_target)) + list(range(end_target, num_target_images)))
+        val_target_subset = Subset(target_loader.dataset, list(range(start_target, end_target)))
+        
+        # Oversampling source training subset
+        oversample_train_factor = len(train_target_subset) // len(train_source_subset)
+        oversampled_train_source = ConcatDataset([train_source_subset] * oversample_train_factor)
+        
+        # Oversampling source validation subset
+        oversample_val_factor = len(val_target_subset) // len(val_source_subset)
+        oversampled_val_source = ConcatDataset([val_source_subset] * oversample_val_factor)
+
+        if args.dataset_condensation == "True":
+            train_source_dataloader = DataLoader(oversampled_train_source, batch_size=32, shuffle=True)
+            val_source_dataloader = DataLoader(oversampled_val_source, batch_size=32, shuffle=True)
+            train_target_dataloader = DataLoader(train_target_subset, batch_size=32, shuffle=True)
+            val_target_dataloader = DataLoader(val_target_subset, batch_size=32, shuffle=True)
+
+        if args.dataset_condensation == "False":
+            train_source_dataloader = DataLoader(train_source_subset, batch_size=32, shuffle=True)
+            val_source_dataloader = DataLoader(val_source_subset, batch_size=32, shuffle=True)
+            train_target_dataloader = DataLoader(train_target_subset, batch_size=32, shuffle=True)
+            val_target_dataloader = DataLoader(val_target_subset, batch_size=32, shuffle=True)
+
+        # Extract features
+        train_source_feature = collect_feature(train_source_dataloader, feature_extractor, device)
+        val_source_feature = collect_feature(val_source_dataloader, feature_extractor, device)
+        train_target_feature = collect_feature(train_target_dataloader, feature_extractor, device)
+        val_target_feature = collect_feature(val_target_dataloader, feature_extractor, device)
+
+        # Calculate A-distance based on the training features
+        A_distance = calculate(train_source_feature,val_source_feature, train_target_feature,val_target_feature, device, True)
+        a_distances.append(A_distance.cpu())
+
+        # You can also calculate A-distance or any other metric for the validation features here if needed
+
+    # Calculate average and standard deviation of A-distance over all training partitions
+    avg_a_distance = np.mean(a_distances)
+    std_dev = np.std(a_distances)
+    
+    return avg_a_distance, std_dev
 
 class CondensedData(Dataset):
   #dataset_list is a list with two tensors, dataset_list[0]

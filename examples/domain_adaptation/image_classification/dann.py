@@ -9,12 +9,14 @@ import argparse
 import shutil
 import os.path as osp
 
+
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 from torch.optim import SGD
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader
+from torch.utils.data import random_split
 import torch.nn.functional as F
 
 import utils
@@ -25,6 +27,7 @@ from tllib.utils.metric import accuracy
 from tllib.utils.meter import AverageMeter, ProgressMeter
 from tllib.utils.logger import CompleteLogger
 from tllib.utils.analysis import collect_feature, tsne, a_distance
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -79,11 +82,23 @@ def main(args: argparse.Namespace):
         #train_source_dataset, train_target_dataset, val_dataset, test_dataset, num_classes, args.class_names = \
          #   utils.get_dataset(args.data, args.root, args.source, args.target,None,val_transform)
 
-    
+    #Following lines save train_source_dataset for visualization, so that t-sne visualization can be made on uncondensed source data with classifiers trained on condensed data.
+    train_source_notcond = train_source_dataset
+    train_source_notcond_loader = DataLoader(train_source_notcond, batch_size=args.batch_size,
+                                     shuffle=True, num_workers=args.workers, drop_last=True)
+
     
     
     if args.dataset_condensation == "True":
         train_source_dataset = utils.get_condensed_source(args.data,args.source,args)
+
+    if args.partition_source != -1:
+        total_len = len(train_source_dataset)
+        print("dataset size: ",total_len)
+        train_len = int(args.partition_source * total_len)
+        train_source_dataset, _ = random_split(train_source_dataset, [train_len, total_len - train_len])
+        print("Post partition source dataset size: ",len(train_source_dataset))
+
     
     
     train_source_loader = DataLoader(train_source_dataset, batch_size=args.batch_size,
@@ -100,9 +115,7 @@ def main(args: argparse.Namespace):
     print("=> using model '{}'".format(args.arch))
     
     backbone = utils.get_model(args.arch, pretrain=not args.scratch, channel=args.channel,num_classes=num_classes,args = args)
-   # print("FIEMFIEMFIEM")
-    #print(backbone.out_features)
-    #print("PIEMPIEMPIEM")
+ 
     pool_layer = nn.Identity() if args.no_pool else None
     classifier = ImageClassifier(backbone, num_classes, bottleneck_dim=args.bottleneck_dim,
                                  pool_layer=pool_layer, finetune=not args.scratch).to(device)
@@ -124,16 +137,23 @@ def main(args: argparse.Namespace):
     # analysis the model
     if args.phase == 'analysis':
         # extract features from both domains
+        
+
         feature_extractor = nn.Sequential(classifier.backbone, classifier.pool_layer, classifier.bottleneck).to(device)
-        source_feature = collect_feature(train_source_loader, feature_extractor, device)
-        target_feature = collect_feature(train_target_loader, feature_extractor, device)
+
+        #source_feature = collect_feature(train_source_loader, feature_extractor, device)
+        #target_feature = collect_feature(train_target_loader, feature_extractor, device)
         # plot t-SNE
         tSNE_filename = osp.join(logger.visualize_directory, 'TSNE.pdf')
-        tsne.visualize(source_feature, target_feature, tSNE_filename)
-        print("Saving t-SNE to", tSNE_filename)
+        #tsne.visualize(source_feature, target_feature, tSNE_filename)
+        #print("Saving t-SNE to", tSNE_filename)
         # calculate A-distance, which is a measure for distribution discrepancy
-        A_distance = a_distance.calculate(source_feature, target_feature, device)
-        print("A-distance =", A_distance)
+        #A_distance = a_distance.calculate(source_feature, target_feature, device)
+        
+        avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
+        print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
+
+        #print("A-distance average: =", A_distance)
         return
 
     if args.phase == 'test':
@@ -191,10 +211,7 @@ def train(train_source_iter: ForeverDataIterator, train_target_iter: ForeverData
     for i in range(args.iters_per_epoch):
         x_s, labels_s = next(train_source_iter)[:2]
 
-        #print("PPPPPPPP")
-        #print(labels_s)
-        #print(x_s.size())
-        #print(next(train_target_iter))
+       
 
         x_t, = next(train_target_iter)[:1]
 
@@ -310,5 +327,8 @@ if __name__ == '__main__':
     parser.add_argument("--no-aug", type=str,default="False",help="Define if you want to do data augmentation")
     parser.add_argument("--channel", type=int, default=3, help="Image channel size, default 3. Only needed to be set for convnet")
     parser.add_argument("--convnet-weights-data-path", type=str,default="none",help="Set absolut path of convnet weights")
+    parser.add_argument("--partition-source", type=float, default=-1, help="partition source training data, effectively discards part of training data")
+    
+
     args = parser.parse_args()
     main(args)

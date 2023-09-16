@@ -131,7 +131,7 @@ def calculate(source_feature: torch.Tensor,val_source_feature:torch.Tensor, targ
 
 def calculate(train_source_feature: torch.Tensor, val_source_feature: torch.Tensor,
               train_target_feature: torch.Tensor, val_target_feature: torch.Tensor,
-              device, progress=True, training_epochs=15, patience=2):
+              device, progress=True, training_epochs=10, patience=15):
 
     # Concatenate training and validation features
     train_feature = torch.cat([train_source_feature, train_target_feature], dim=0)
@@ -190,12 +190,12 @@ def calculate(train_source_feature: torch.Tensor, val_source_feature: torch.Tens
                 if label.sum().item() > 0:  # If there are source samples in the batch
                     source_loss = F.binary_cross_entropy(y[label == 1], label[label == 1])
                     source_val_loss += source_loss.item() * label[label == 1].shape[0]
+
                     source_samples += label[label == 1].shape[0]
 
         source_val_loss /= source_samples
 
-        if progress:
-            print("epoch {} accuracy: {} A-dist: {} Source Val Loss: {}".format(epoch, meter.avg, a_distance, source_val_loss))
+        
 
         # Check for overfitting on source samples
         if source_val_loss < best_val_loss:
@@ -204,12 +204,17 @@ def calculate(train_source_feature: torch.Tensor, val_source_feature: torch.Tens
         else:
             patience_counter += 1
 
-        if patience_counter >= patience:
-            print("Early stopping due to overfitting on source samples.")
-            break
+        
 
         error = 1 - meter.avg / 100
         a_distance = 2 * (1 - 2 * error)
+
+        if progress:
+            print("epoch {} accuracy: {} A-dist: {} Source Val Loss: {}".format(epoch, meter.avg, a_distance, source_val_loss))
+
+        if patience_counter >= patience:
+            print("Early stopping due to overfitting on source samples.")
+            break
 
     return a_distance
 

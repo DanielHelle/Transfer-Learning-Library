@@ -1,0 +1,26 @@
+DANN 10ipc: Mean Accuracy: 78.63999887428284, Standard Deviation: 0.6967065787744932
+DANN baseline USPS to MNIST: Mean Accuracy: 67.51, Standard Deviation: 0.8296987405076619
+
+MCD 10ipc USPS to MNIST: Mean Accuracy: 38.919998724746705, Standard Deviation: 0.7393239867075655
+MCD baseline USPS to MNIST: Mean Accuracy: 95.46, Standard Deviation: 0.7452516353554706
+
+JAN 10ipc USPS to MNIST: Mean Accuracy: 71.83999867591858, Standard Deviation: 0.46303347544429097
+JAN baseline USPS to MNIST: Mean Accuracy: 51.89000000000001, Standard Deviation: 1.9189580506097574
+
+MCC 10ipc USPS to MNIST: Mean Accuracy: 58.44999857177735, Standard Deviation: 1.3546217256516855
+MCC baseline USPS to MNIST: Mean Accuracy: Mean Accuracy: 76.85, Standard Deviation: 1.2324771803161338
+
+CDAN 10ipc USPS to MNIST: Mean Accuracy: 79.44999890174867, Standard Deviation: 0.6678323222223245
+CDAN baseline USPS to MNIST: Mean Accuracy: 93.35, Standard Deviation: 0.6
+
+
+
+####
+DANN 10ipc: Mean Accuracy: 78.63999887428284, Standard Deviation: 0.6967065787744932
+MCD 10ipc USPS to MNIST: Mean Accuracy: 38.919998724746705, Standard Deviation: 0.7393239867075655
+JAN 10ipc USPS to MNIST: Mean Accuracy: 71.83999867591858, Standard Deviation: 0.46303347544429097
+MCC 10ipc USPS to MNIST: Mean Accuracy: 58.44999857177735, Standard Deviation: 1.3546217256516855
+CDAN 10ipc USPS to MNIST: Mean Accuracy: 79.44999890174867, Standard Deviation: 0.6678323222223245
+
+
+

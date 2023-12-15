@@ -1,0 +1,510 @@
+DANN 10ipc USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, trade_off=1.0, batch_size=3, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=60, iters_per_epoch=1000, print_freq=100, seed=0, per_class_eval=False, log='logs/dann/experiment/Digits_U2M/10ipc/', phase='test-5-fold', download_dataset_only='False', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/res_DC_pre_processed_usps_ConvNet_10ipc.pt', no_aug='False', channel=3, convnet_weights_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/state_dict_DC_pre_processed_usps_ConvNet_10ipc.pt', partition_source=-1)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py:53: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [  0/667] Time  0.051 ( 0.051)    Loss 1.6524e+00 (1.6524e+00)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.003 ( 0.003)    Loss 2.6102e-01 (1.0903e+00)    Acc@1 100.00 ( 80.53)
+Test: [200/667] Time  0.003 ( 0.003)    Loss 4.4455e-03 (1.0717e+00)    Acc@1 100.00 ( 80.10)
+Test: [300/667] Time  0.002 ( 0.003)    Loss 7.8305e-02 (1.0043e+00)    Acc@1 100.00 ( 80.73)
+Test: [400/667] Time  0.003 ( 0.003)    Loss 2.7269e-03 (1.0293e+00)    Acc@1 100.00 ( 80.55)
+Test: [500/667] Time  0.002 ( 0.003)    Loss 2.2125e+00 (1.0108e+00)    Acc@1  66.67 ( 80.90)
+Test: [600/667] Time  0.003 ( 0.003)    Loss 7.4059e-03 (1.0590e+00)    Acc@1 100.00 ( 80.26)
+ * Acc@1 80.000
+test_acc1_partition1: 79.99999895858765
+Test: [  0/667] Time  0.003 ( 0.003)    Loss 2.2152e+00 (2.2152e+00)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.002 ( 0.003)    Loss 1.8038e-04 (1.1442e+00)    Acc@1 100.00 ( 79.87)
+Test: [200/667] Time  0.002 ( 0.003)    Loss 2.9663e+00 (1.2597e+00)    Acc@1   0.00 ( 76.95)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 1.0330e+00 (1.2557e+00)    Acc@1  66.67 ( 77.41)
+Test: [400/667] Time  0.003 ( 0.002)    Loss 3.9939e-03 (1.2391e+00)    Acc@1 100.00 ( 77.64)
+Test: [500/667] Time  0.002 ( 0.003)    Loss 4.9134e+00 (1.2444e+00)    Acc@1   0.00 ( 77.58)
+Test: [600/667] Time  0.003 ( 0.003)    Loss 2.1509e-01 (1.1857e+00)    Acc@1 100.00 ( 78.09)
+ * Acc@1 78.250
+test_acc1_partition2: 78.24999887275696
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 3.2652e+00 (3.2652e+00)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.002 ( 0.003)    Loss 4.4038e+00 (1.1713e+00)    Acc@1   0.00 ( 78.55)
+Test: [200/667] Time  0.003 ( 0.003)    Loss 6.2212e-03 (1.0729e+00)    Acc@1 100.00 ( 79.10)
+Test: [300/667] Time  0.003 ( 0.003)    Loss 3.8428e-01 (1.0777e+00)    Acc@1  66.67 ( 77.74)
+Test: [400/667] Time  0.002 ( 0.003)    Loss 3.2215e+00 (1.1429e+00)    Acc@1  33.33 ( 77.47)
+Test: [500/667] Time  0.003 ( 0.003)    Loss 3.1604e-03 (1.0961e+00)    Acc@1 100.00 ( 78.51)
+Test: [600/667] Time  0.003 ( 0.003)    Loss 3.7800e-04 (1.0624e+00)    Acc@1 100.00 ( 78.65)
+ * Acc@1 78.500
+test_acc1_partition3: 78.49999884033203
+Test: [  0/667] Time  0.003 ( 0.003)    Loss 2.2079e+00 (2.2079e+00)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.003 ( 0.003)    Loss 3.2674e+00 (1.0745e+00)    Acc@1  66.67 ( 80.86)
+Test: [200/667] Time  0.002 ( 0.003)    Loss 9.9473e-01 (1.1254e+00)    Acc@1  66.67 ( 78.94)
+Test: [300/667] Time  0.002 ( 0.003)    Loss 4.9219e-01 (1.2270e+00)    Acc@1  66.67 ( 77.41)
+Test: [400/667] Time  0.002 ( 0.003)    Loss 2.0470e+00 (1.1328e+00)    Acc@1  66.67 ( 77.81)
+Test: [500/667] Time  0.002 ( 0.003)    Loss 2.3418e-03 (1.1460e+00)    Acc@1 100.00 ( 77.45)
+Test: [600/667] Time  0.003 ( 0.003)    Loss 1.6561e+00 (1.1164e+00)    Acc@1  66.67 ( 77.98)
+ * Acc@1 78.050
+test_acc1_partition4: 78.04999884414673
+Test: [  0/667] Time  0.003 ( 0.003)    Loss 1.3791e-03 (1.3791e-03)    Acc@1 100.00 (100.00)
+Test: [100/667] Time  0.003 ( 0.003)    Loss 1.0163e-03 (8.5487e-01)    Acc@1 100.00 ( 83.17)
+Test: [200/667] Time  0.002 ( 0.003)    Loss 3.4037e+00 (9.0434e-01)    Acc@1  66.67 ( 80.43)
+Test: [300/667] Time  0.003 ( 0.003)    Loss 5.3040e+00 (9.9749e-01)    Acc@1  33.33 ( 79.40)
+Test: [400/667] Time  0.002 ( 0.003)    Loss 2.0850e+00 (1.0500e+00)    Acc@1  33.33 ( 78.72)
+Test: [500/667] Time  0.002 ( 0.003)    Loss 2.4097e+00 (1.0723e+00)    Acc@1  66.67 ( 78.78)
+Test: [600/667] Time  0.003 ( 0.003)    Loss 1.7848e-02 (1.0868e+00)    Acc@1 100.00 ( 78.48)
+ * Acc@1 78.400
+test_acc1_partition5: 78.39999885559082
+Mean Accuracy: 78.63999887428284, Standard Deviation: 0.6967065787744932
+DANN baseline USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, trade_off=1.0, batch_size=32, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=60, iters_per_epoch=1000, print_freq=100, seed=0, per_class_eval=False, log='logs/dann/experiment_baseline/Digits_U2M/', phase='test-5-fold', download_dataset_only='False', dataset_condensation='False', condensed_data_path='none', no_aug='False', channel=3, convnet_weights_data_path='none', partition_source=0.8)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/dann.py:53: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+dataset size:  7291
+Post partition source dataset size:  5832
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [ 0/63]   Time  0.049 ( 0.049)    Loss 2.4502e+00 (2.4502e+00)    Acc@1  65.62 ( 65.62)
+ * Acc@1 69.000
+test_acc1_partition1: 69.0
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 2.6908e+00 (2.6908e+00)    Acc@1  68.75 ( 68.75)
+ * Acc@1 67.150
+test_acc1_partition2: 67.15
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 1.5685e+00 (1.5685e+00)    Acc@1  62.50 ( 62.50)
+ * Acc@1 67.800
+test_acc1_partition3: 67.8
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 3.7743e+00 (3.7743e+00)    Acc@1  65.62 ( 65.62)
+ * Acc@1 66.800
+test_acc1_partition4: 66.8
+Test: [ 0/63]   Time  0.008 ( 0.008)    Loss 2.1963e+00 (2.1963e+00)    Acc@1  68.75 ( 68.75)
+ * Acc@1 66.800
+test_acc1_partition5: 66.8
+Mean Accuracy: 67.51, Standard Deviation: 0.8296987405076619
+MCD 10ipc USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=1024, no_pool=False, scratch=False, trade_off=0.3, trade_off_entropy=0.03, num_k=4, batch_size=3, lr=0.001, workers=2, epochs=60, iters_per_epoch=1000, print_freq=100, seed=0, per_class_eval=False, log='logs/mcd/experiment/Digits_U2M/10ipc/', phase='test-5-fold', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/res_DC_pre_processed_usps_ConvNet_10ipc.pt', no_aug='False', channel=3, convnet_weights_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/state_dict_DC_pre_processed_usps_ConvNet_10ipc.pt', partition_source=-1)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/mcd.py:43: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [  0/667] Time  0.033 ( 0.033)    Acc_1  66.67 ( 66.67)   Acc_2  33.33 ( 33.33)
+Test: [100/667] Time  0.003 ( 0.003)    Acc_1   0.00 ( 38.94)   Acc_2   0.00 ( 34.65)
+Test: [200/667] Time  0.002 ( 0.003)    Acc_1  66.67 ( 36.65)   Acc_2  33.33 ( 32.84)
+Test: [300/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 37.76)   Acc_2  33.33 ( 33.67)
+Test: [400/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 37.82)   Acc_2  33.33 ( 32.83)
+Test: [500/667] Time  0.002 ( 0.002)    Acc_1   0.00 ( 37.92)   Acc_2   0.00 ( 32.60)
+Test: [600/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 38.16)   Acc_2  33.33 ( 32.72)
+ * Acc1 38.050 Acc2 32.650
+test_acc1_partition1: 38.0499987449646, 32.649998874664306
+Test: [  0/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 33.33)   Acc_2  33.33 ( 33.33)
+Test: [100/667] Time  0.002 ( 0.002)    Acc_1  66.67 ( 36.96)   Acc_2   0.00 ( 31.35)
+Test: [200/667] Time  0.002 ( 0.002)    Acc_1  66.67 ( 38.31)   Acc_2  66.67 ( 30.68)
+Test: [300/667] Time  0.002 ( 0.002)    Acc_1  66.67 ( 39.31)   Acc_2  66.67 ( 32.34)
+Test: [400/667] Time  0.002 ( 0.002)    Acc_1   0.00 ( 40.15)   Acc_2  33.33 ( 32.92)
+Test: [500/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 39.59)   Acc_2  33.33 ( 32.53)
+Test: [600/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 39.60)   Acc_2  66.67 ( 32.72)
+ * Acc1 39.700 Acc2 33.000
+test_acc1_partition2: 39.699998693466185, 32.99999888038635
+Test: [  0/667] Time  0.002 ( 0.002)    Acc_1  66.67 ( 66.67)   Acc_2  33.33 ( 33.33)
+Test: [100/667] Time  0.002 ( 0.002)    Acc_1  66.67 ( 37.29)   Acc_2  66.67 ( 30.69)
+Test: [200/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 39.80)   Acc_2  33.33 ( 33.17)
+Test: [300/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 39.98)   Acc_2  33.33 ( 33.44)
+Test: [400/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 39.32)   Acc_2  33.33 ( 33.17)
+Test: [500/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 39.06)   Acc_2  33.33 ( 33.07)
+Test: [600/667] Time  0.002 ( 0.002)    Acc_1 100.00 ( 39.93)   Acc_2  66.67 ( 33.39)
+ * Acc1 39.800 Acc2 33.350
+test_acc1_partition3: 39.79999867630005, 33.349998830795286
+Test: [  0/667] Time  0.003 ( 0.003)    Acc_1  33.33 ( 33.33)   Acc_2  33.33 ( 33.33)
+Test: [100/667] Time  0.003 ( 0.002)    Acc_1  66.67 ( 41.58)   Acc_2  66.67 ( 37.62)
+Test: [200/667] Time  0.003 ( 0.002)    Acc_1  33.33 ( 39.64)   Acc_2  33.33 ( 34.66)
+Test: [300/667] Time  0.002 ( 0.002)    Acc_1   0.00 ( 38.65)   Acc_2   0.00 ( 33.22)
+Test: [400/667] Time  0.002 ( 0.002)    Acc_1  66.67 ( 40.07)   Acc_2 100.00 ( 34.08)
+Test: [500/667] Time  0.002 ( 0.002)    Acc_1   0.00 ( 39.52)   Acc_2  33.33 ( 33.80)
+Test: [600/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 39.49)   Acc_2   0.00 ( 34.00)
+ * Acc1 38.900 Acc2 33.500
+test_acc1_partition4: 38.89999875640869, 33.49999892234802
+Test: [  0/667] Time  0.002 ( 0.002)    Acc_1  33.33 ( 33.33)   Acc_2  33.33 ( 33.33)
+Test: [100/667] Time  0.002 ( 0.002)    Acc_1  66.67 ( 39.60)   Acc_2   0.00 ( 30.69)
+Test: [200/667] Time  0.002 ( 0.002)    Acc_1   0.00 ( 37.31)   Acc_2   0.00 ( 31.84)
+Test: [300/667] Time  0.002 ( 0.002)    Acc_1   0.00 ( 38.76)   Acc_2   0.00 ( 33.00)
+Test: [400/667] Time  0.002 ( 0.002)    Acc_1   0.00 ( 38.07)   Acc_2   0.00 ( 32.92)
+Test: [500/667] Time  0.002 ( 0.002)    Acc_1   0.00 ( 38.66)   Acc_2  33.33 ( 33.20)
+Test: [600/667] Time  0.002 ( 0.002)    Acc_1  66.67 ( 38.16)   Acc_2   0.00 ( 33.11)
+ * Acc1 38.150 Acc2 33.050
+test_acc1_partition5: 38.149998752593994, 33.049998838424685
+Mean Accuracy: 38.919998724746705, Standard Deviation: 0.7393239867075655
+MCD baseline USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=1024, no_pool=False, scratch=False, trade_off=0.3, trade_off_entropy=0.03, num_k=4, batch_size=32, lr=0.001, workers=2, epochs=60, iters_per_epoch=1000, print_freq=100, seed=0, per_class_eval=False, log='logs/mcd/experiment_baseline/Digits_U2M/', phase='test-5-fold', dataset_condensation='False', condensed_data_path='none', no_aug='False', channel=3, convnet_weights_data_path='none', partition_source=0.8)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/mcd.py:43: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+dataset size:  7291
+Post partition source dataset size:  5832
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [ 0/63]   Time  0.048 ( 0.048)    Acc_1  96.88 ( 96.88)   Acc_2  96.88 ( 96.88)
+ * Acc1 95.600 Acc2 95.350
+test_acc1_partition1: 95.6, 95.35
+Test: [ 0/63]   Time  0.009 ( 0.009)    Acc_1  84.38 ( 84.38)   Acc_2  87.50 ( 87.50)
+ * Acc1 96.050 Acc2 95.950
+test_acc1_partition2: 96.05, 95.95
+Test: [ 0/63]   Time  0.009 ( 0.009)    Acc_1  96.88 ( 96.88)   Acc_2  96.88 ( 96.88)
+ * Acc1 95.250 Acc2 95.350
+test_acc1_partition3: 95.25, 95.35
+Test: [ 0/63]   Time  0.009 ( 0.009)    Acc_1 100.00 (100.00)   Acc_2 100.00 (100.00)
+ * Acc1 96.200 Acc2 95.900
+test_acc1_partition4: 96.2, 95.9
+Test: [ 0/63]   Time  0.009 ( 0.009)    Acc_1  93.75 ( 93.75)   Acc_2  93.75 ( 93.75)
+ * Acc1 94.000 Acc2 94.100
+test_acc1_partition5: 94.0, 94.1
+Mean Accuracy: 95.46, Standard Deviation: 0.7452516353554706
+JAN 10ipc USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, linear=False, adversarial=False, trade_off=1.0, batch_size=3, lr=0.003, lr_gamma=0.0003, lr_decay=0.75, momentum=0.9, wd=0.0005, workers=2, epochs=60, iters_per_epoch=500, print_freq=100, seed=0, per_class_eval=False, log='logs/jan/experiment/Digits_U2M/10ipc/', phase='test-5-fold', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/res_DC_pre_processed_usps_ConvNet_10ipc.pt', no_aug='False', channel=3, convnet_weights_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/state_dict_DC_pre_processed_usps_ConvNet_10ipc.pt', partition_source=-1)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/jan.py:41: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [  0/667] Time  0.027 ( 0.027)    Loss 3.3021e+00 (3.3021e+00)    Acc@1  33.33 ( 33.33)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 2.0438e+00 (1.7279e+00)    Acc@1  66.67 ( 73.93)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 3.1836e-02 (1.8071e+00)    Acc@1 100.00 ( 74.13)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 9.9611e-02 (1.7967e+00)    Acc@1 100.00 ( 74.97)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 2.9295e-03 (1.7856e+00)    Acc@1 100.00 ( 73.82)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 2.5316e-02 (1.7736e+00)    Acc@1 100.00 ( 73.39)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 3.7110e-01 (1.8595e+00)    Acc@1  66.67 ( 72.71)
+ * Acc@1 72.450
+test_acc1_partition1: 72.4499987258911
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 5.2401e+00 (5.2401e+00)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 2.3838e-03 (2.1318e+00)    Acc@1 100.00 ( 72.28)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 4.2425e+00 (2.1645e+00)    Acc@1  33.33 ( 72.47)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 1.7705e-01 (2.0921e+00)    Acc@1 100.00 ( 72.09)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 1.0894e-01 (2.0896e+00)    Acc@1 100.00 ( 71.16)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 1.2949e+01 (2.1440e+00)    Acc@1   0.00 ( 70.59)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 5.3231e-01 (2.0848e+00)    Acc@1  66.67 ( 71.10)
+ * Acc@1 71.050
+test_acc1_partition2: 71.04999870491028
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 9.1042e-01 (9.1042e-01)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 9.1531e+00 (2.0483e+00)    Acc@1  33.33 ( 72.28)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 3.4001e-03 (2.0190e+00)    Acc@1 100.00 ( 71.64)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 1.1436e+00 (2.0162e+00)    Acc@1  33.33 ( 71.32)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 1.8174e+00 (2.0661e+00)    Acc@1  66.67 ( 71.32)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 1.1067e+00 (2.0263e+00)    Acc@1  66.67 ( 71.66)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 2.1634e-03 (1.9431e+00)    Acc@1 100.00 ( 72.32)
+ * Acc@1 71.700
+test_acc1_partition3: 71.69999866485595
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 3.9571e+00 (3.9571e+00)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 7.7172e+00 (1.8054e+00)    Acc@1  66.67 ( 72.94)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 2.8470e-01 (1.9680e+00)    Acc@1  66.67 ( 73.30)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 6.2894e-01 (2.1762e+00)    Acc@1  66.67 ( 71.98)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 8.5734e-01 (2.0439e+00)    Acc@1  66.67 ( 72.15)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 1.5693e+00 (2.1126e+00)    Acc@1  66.67 ( 71.52)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 1.7587e-04 (2.0713e+00)    Acc@1 100.00 ( 71.94)
+ * Acc@1 71.950
+test_acc1_partition4: 71.94999864006043
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 1.4393e-01 (1.4393e-01)    Acc@1 100.00 (100.00)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 1.5036e-02 (1.7052e+00)    Acc@1 100.00 ( 75.91)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 1.3097e+00 (1.7291e+00)    Acc@1  66.67 ( 73.47)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 9.3541e+00 (1.8833e+00)    Acc@1  33.33 ( 72.43)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 8.0056e+00 (1.9773e+00)    Acc@1  33.33 ( 71.32)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 7.7829e-01 (1.9533e+00)    Acc@1  66.67 ( 71.79)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 2.8853e+00 (1.9490e+00)    Acc@1  33.33 ( 71.99)
+ * Acc@1 72.050
+test_acc1_partition5: 72.04999864387513
+Mean Accuracy: 71.83999867591858, Standard Deviation: 0.46303347544429097
+JAN baseline USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, linear=False, adversarial=False, trade_off=1.0, batch_size=32, lr=0.003, lr_gamma=0.0003, lr_decay=0.75, momentum=0.9, wd=0.0005, workers=2, epochs=60, iters_per_epoch=500, print_freq=100, seed=0, per_class_eval=False, log='logs/jan/experiment_baseline/Digits_U2M/', phase='test-5-fold', dataset_condensation='False', condensed_data_path='none', no_aug='False', channel=3, convnet_weights_data_path='none', partition_source=0.8)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/jan.py:41: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+dataset size:  7291
+Post partition source dataset size:  5832
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [ 0/63]   Time  0.045 ( 0.045)    Loss 4.0063e+00 (4.0063e+00)    Acc@1  43.75 ( 43.75)
+ * Acc@1 55.000
+test_acc1_partition1: 55.0
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 5.1167e+00 (5.1167e+00)    Acc@1  43.75 ( 43.75)
+ * Acc@1 50.400
+test_acc1_partition2: 50.4
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 4.2171e+00 (4.2171e+00)    Acc@1  56.25 ( 56.25)
+ * Acc@1 51.500
+test_acc1_partition3: 51.5
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 5.8954e+00 (5.8954e+00)    Acc@1  40.62 ( 40.62)
+ * Acc@1 52.950
+test_acc1_partition4: 52.95
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 6.4342e+00 (6.4342e+00)    Acc@1  37.50 ( 37.50)
+ * Acc@1 49.600
+test_acc1_partition5: 49.6
+Mean Accuracy: 51.89000000000001, Standard Deviation: 1.9189580506097574
+MCC 10ipc USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, temperature=2.5, trade_off=1.0, batch_size=3, lr=0.005, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=60, iters_per_epoch=1000, print_freq=100, seed=0, per_class_eval=False, log='logs/mcc/experiment/Digits_U2M/10ipc/', phase='test-5-fold', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/res_DC_pre_processed_usps_ConvNet_10ipc.pt', no_aug='False', channel=3, convnet_weights_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/state_dict_DC_pre_processed_usps_ConvNet_10ipc.pt', partition_source=-1)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/mcc.py:40: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [  0/667] Time  0.029 ( 0.029)    Loss 5.7270e+00 (5.7270e+00)    Acc@1  33.33 ( 33.33)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 3.9978e+00 (3.5170e+00)    Acc@1  33.33 ( 60.07)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 4.8248e+00 (3.5495e+00)    Acc@1  66.67 ( 61.53)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 1.2727e-01 (3.6275e+00)    Acc@1 100.00 ( 61.57)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 1.5563e-02 (3.7514e+00)    Acc@1 100.00 ( 60.18)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 8.8692e-02 (3.7212e+00)    Acc@1 100.00 ( 61.01)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 9.2604e-02 (3.8309e+00)    Acc@1 100.00 ( 60.51)
+ * Acc@1 60.350
+test_acc1_partition1: 60.34999863243103
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 6.5854e+00 (6.5854e+00)    Acc@1  33.33 ( 33.33)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 2.9773e+00 (4.1690e+00)    Acc@1  66.67 ( 58.42)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 6.4305e+00 (4.6060e+00)    Acc@1   0.00 ( 56.05)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 2.8625e+00 (4.5150e+00)    Acc@1  33.33 ( 54.93)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 4.2563e-01 (4.4328e+00)    Acc@1 100.00 ( 55.44)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 1.2738e+01 (4.4549e+00)    Acc@1  66.67 ( 55.95)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 1.6845e+00 (4.4098e+00)    Acc@1  33.33 ( 56.46)
+ * Acc@1 56.750
+test_acc1_partition2: 56.74999863815307
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 8.0478e+00 (8.0478e+00)    Acc@1  33.33 ( 33.33)
+Test: [100/667] Time  0.001 ( 0.002)    Loss 2.0131e+00 (3.9521e+00)    Acc@1  33.33 ( 63.04)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 3.8208e-02 (4.1590e+00)    Acc@1 100.00 ( 59.37)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 2.1244e-01 (4.1644e+00)    Acc@1 100.00 ( 58.80)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 3.5610e+00 (4.1410e+00)    Acc@1  66.67 ( 59.27)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 4.4245e-03 (4.0835e+00)    Acc@1 100.00 ( 60.15)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 6.7188e-05 (4.0939e+00)    Acc@1 100.00 ( 59.62)
+ * Acc@1 59.700
+test_acc1_partition3: 59.699998544692995
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 9.0774e-01 (9.0774e-01)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 5.1335e+00 (4.0672e+00)    Acc@1  66.67 ( 57.76)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 1.8782e+00 (4.2481e+00)    Acc@1  66.67 ( 57.05)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 7.7091e-01 (4.3947e+00)    Acc@1  66.67 ( 58.25)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 3.2666e+00 (4.3593e+00)    Acc@1  33.33 ( 57.52)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 4.2279e+00 (4.4480e+00)    Acc@1  33.33 ( 56.75)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 8.4320e+00 (4.3795e+00)    Acc@1  33.33 ( 57.57)
+ * Acc@1 57.900
+test_acc1_partition4: 57.89999854469299
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 1.3734e-01 (1.3734e-01)    Acc@1 100.00 (100.00)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 2.1245e+00 (3.8470e+00)    Acc@1  66.67 ( 60.40)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 6.0435e+00 (3.8665e+00)    Acc@1  66.67 ( 59.20)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 6.1764e-03 (4.0930e+00)    Acc@1 100.00 ( 57.48)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 2.8402e+00 (4.1356e+00)    Acc@1  66.67 ( 57.86)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 7.6564e-04 (4.2180e+00)    Acc@1 100.00 ( 57.42)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 4.7733e+00 (4.1978e+00)    Acc@1  33.33 ( 57.63)
+ * Acc@1 57.550
+test_acc1_partition5: 57.54999849891663
+Mean Accuracy: 58.44999857177735, Standard Deviation: 1.3546217256516855
+MCC baseline USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, temperature=2.5, trade_off=1.0, batch_size=32, lr=0.005, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=60, iters_per_epoch=1000, print_freq=100, seed=0, per_class_eval=False, log='logs/mcc/experiment_baseline/Digits_U2M/', phase='test-5-fold', dataset_condensation='False', condensed_data_path='none', no_aug='False', channel=3, convnet_weights_data_path='none', partition_source=0.8)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/mcc.py:40: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+dataset size:  7291
+Post partition source dataset size:  5832
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [ 0/63]   Time  0.050 ( 0.050)    Loss 7.7328e+00 (7.7328e+00)    Acc@1  68.75 ( 68.75)
+ * Acc@1 77.750
+test_acc1_partition1: 77.75
+Test: [ 0/63]   Time  0.010 ( 0.010)    Loss 9.0370e+00 (9.0370e+00)    Acc@1  59.38 ( 59.38)
+ * Acc@1 76.750
+test_acc1_partition2: 76.75
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 4.4111e+00 (4.4111e+00)    Acc@1  78.12 ( 78.12)
+ * Acc@1 78.150
+test_acc1_partition3: 78.15
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 4.5747e+00 (4.5747e+00)    Acc@1  75.00 ( 75.00)
+ * Acc@1 77.000
+test_acc1_partition4: 77.0
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 5.2371e+00 (5.2371e+00)    Acc@1  75.00 ( 75.00)
+ * Acc@1 74.600
+test_acc1_partition5: 74.6
+Mean Accuracy: 76.85, Standard Deviation: 1.2324771803161338
+CDAN 10ipc USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, randomized=False, randomized_dim=1024, entropy=False, trade_off=1.0, batch_size=3, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=60, iters_per_epoch=1000, print_freq=100, seed=0, per_class_eval=False, log='logs/cdan/experiment/Digits_U2M/10ipc/', phase='test-5-fold', download_dataset_only='False', dataset_condensation='True', condensed_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/res_DC_pre_processed_usps_ConvNet_10ipc.pt', no_aug='False', channel=3, convnet_weights_data_path='/home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/state_dict_DC_pre_processed_usps_ConvNet_10ipc.pt', partition_source=-1)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/cdan.py:41: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [  0/667] Time  0.028 ( 0.028)    Loss 5.3271e+00 (5.3271e+00)    Acc@1  33.33 ( 33.33)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 1.2355e+00 (1.2021e+00)    Acc@1  66.67 ( 79.54)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 4.4894e+00 (1.2094e+00)    Acc@1  66.67 ( 79.60)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 1.1190e-03 (1.2144e+00)    Acc@1 100.00 ( 79.96)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 4.9338e-04 (1.2317e+00)    Acc@1 100.00 ( 79.80)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 2.4585e+00 (1.1947e+00)    Acc@1  66.67 ( 80.11)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 1.0918e-01 (1.2317e+00)    Acc@1 100.00 ( 79.53)
+ * Acc@1 79.400
+test_acc1_partition1: 79.39999896621704
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 1.4485e+00 (1.4485e+00)    Acc@1  66.67 ( 66.67)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 2.3834e+00 (1.5378e+00)    Acc@1  66.67 ( 78.55)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 2.6858e+00 (1.4549e+00)    Acc@1  66.67 ( 78.28)
+Test: [300/667] Time  0.001 ( 0.002)    Loss 2.7347e-02 (1.4125e+00)    Acc@1 100.00 ( 78.85)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 1.4277e-02 (1.4090e+00)    Acc@1 100.00 ( 78.80)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 4.0953e+00 (1.3957e+00)    Acc@1  33.33 ( 78.71)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 3.5859e-02 (1.3886e+00)    Acc@1 100.00 ( 78.98)
+ * Acc@1 78.850
+test_acc1_partition2: 78.84999883842468
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 2.3277e+00 (2.3277e+00)    Acc@1  33.33 ( 33.33)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 5.2431e+00 (1.3202e+00)    Acc@1  33.33 ( 80.20)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 3.0506e-02 (1.2816e+00)    Acc@1 100.00 ( 80.43)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 3.2881e-02 (1.2573e+00)    Acc@1 100.00 ( 79.96)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 1.5066e-03 (1.2304e+00)    Acc@1 100.00 ( 80.55)
+Test: [500/667] Time  0.001 ( 0.002)    Loss 6.5922e-04 (1.2365e+00)    Acc@1 100.00 ( 80.51)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 2.0585e-03 (1.2202e+00)    Acc@1 100.00 ( 80.53)
+ * Acc@1 80.700
+test_acc1_partition3: 80.6999988937378
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 1.1476e-02 (1.1476e-02)    Acc@1 100.00 (100.00)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 3.9494e+00 (1.1350e+00)    Acc@1  66.67 ( 79.54)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 1.4173e-02 (1.1852e+00)    Acc@1 100.00 ( 80.76)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 1.2038e-01 (1.3141e+00)    Acc@1 100.00 ( 79.18)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 4.9032e-02 (1.3414e+00)    Acc@1 100.00 ( 79.47)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 8.3345e-02 (1.4169e+00)    Acc@1 100.00 ( 78.64)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 3.8835e+00 (1.3615e+00)    Acc@1  33.33 ( 79.31)
+ * Acc@1 79.400
+test_acc1_partition4: 79.39999891281128
+Test: [  0/667] Time  0.002 ( 0.002)    Loss 3.0288e-03 (3.0288e-03)    Acc@1 100.00 (100.00)
+Test: [100/667] Time  0.002 ( 0.002)    Loss 2.8339e+00 (1.1288e+00)    Acc@1  33.33 ( 81.85)
+Test: [200/667] Time  0.002 ( 0.002)    Loss 2.5993e+00 (1.3512e+00)    Acc@1  66.67 ( 78.11)
+Test: [300/667] Time  0.002 ( 0.002)    Loss 7.0537e+00 (1.3877e+00)    Acc@1  33.33 ( 77.74)
+Test: [400/667] Time  0.002 ( 0.002)    Loss 2.8776e+00 (1.3598e+00)    Acc@1  66.67 ( 77.89)
+Test: [500/667] Time  0.002 ( 0.002)    Loss 1.1618e-03 (1.3457e+00)    Acc@1 100.00 ( 77.98)
+Test: [600/667] Time  0.002 ( 0.002)    Loss 3.6548e+00 (1.3108e+00)    Acc@1  66.67 ( 78.87)
+ * Acc@1 78.900
+test_acc1_partition5: 78.89999889755249
+Mean Accuracy: 79.44999890174867, Standard Deviation: 0.6678323222223245
+CDAN baseline USPS to MNIST
+Namespace(root='data/digits', data='Digits', source=['USPS'], target=['MNIST'], train_resizing='res.', val_resizing='res.', resize_size=32, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=[0.485], norm_std=[0.229], arch='convnet', bottleneck_dim=256, no_pool=False, scratch=False, randomized=False, randomized_dim=1024, entropy=False, trade_off=1.0, batch_size=32, lr=0.01, lr_gamma=0.001, lr_decay=0.75, momentum=0.9, weight_decay=0.001, workers=2, epochs=60, iters_per_epoch=1000, print_freq=100, seed=0, per_class_eval=False, log='logs/cdan/experiment_baseline/Digits_U2M/', phase='test-5-fold', download_dataset_only='False', dataset_condensation='False', condensed_data_path='none', no_aug='False', channel=3, convnet_weights_data_path='none', partition_source=0.8)
+/home/daniel/exjobb/Transfer-Learning-Library/examples/domain_adaptation/image_classification/cdan.py:41: UserWarning: You have chosen to seed training. This will turn on the CUDNN deterministic setting, which can slow down your training considerably! You may see unexpected behavior when restarting from checkpoints.
+  warnings.warn('You have chosen to seed training. '
+train_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+val_transform:  Compose(
+    ResizeImage(size=(32, 32))
+    ToTensor()
+    Normalize(mean=[0.485], std=[0.229])
+)
+dataset size:  7291
+Post partition source dataset size:  5832
+=> using model 'convnet'
+convnet
+Original dataset size: 10000
+Dataset size after discarding 0 sample(s): 10000
+Test: [ 0/63]   Time  0.047 ( 0.047)    Loss 1.3028e-01 (1.3028e-01)    Acc@1  96.88 ( 96.88)
+ * Acc@1 93.250
+test_acc1_partition1: 93.25
+Test: [ 0/63]   Time  0.011 ( 0.011)    Loss 1.4814e-01 (1.4814e-01)    Acc@1  96.88 ( 96.88)
+ * Acc@1 93.050
+test_acc1_partition2: 93.05
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 2.4382e-01 (2.4382e-01)    Acc@1  96.88 ( 96.88)
+ * Acc@1 93.850
+test_acc1_partition3: 93.85
+Test: [ 0/63]   Time  0.011 ( 0.011)    Loss 1.4376e-01 (1.4376e-01)    Acc@1  96.88 ( 96.88)
+ * Acc@1 94.150
+test_acc1_partition4: 94.15
+Test: [ 0/63]   Time  0.009 ( 0.009)    Loss 8.4567e-02 (8.4567e-02)    Acc@1  96.88 ( 96.88)
+ * Acc@1 92.450
+test_acc1_partition5: 92.45
+Mean Accuracy: 93.35, Standard Deviation: 0.6

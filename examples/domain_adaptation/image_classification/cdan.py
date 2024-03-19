@@ -130,6 +130,11 @@ def main(args: argparse.Namespace):
         avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
         print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
         return
+    
+    if args.phase == 'test-5-fold':
+        mean_acc, std_acc = utils.validate_5_fold(test_loader, classifier, args, device)
+        print(f"Mean Accuracy: {mean_acc}, Standard Deviation: {std_acc}")
+        return
 
     if args.phase == 'test':
         acc1 = utils.validate(test_loader, classifier, args, device)
@@ -293,7 +298,7 @@ if __name__ == '__main__':
                         help='whether output per-class accuracy during evaluation')
     parser.add_argument("--log", type=str, default='cdan',
                         help="Where to save logs, checkpoints and debugging images.")
-    parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis'],
+    parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis','test-5-fold'],
                         help="When phase is 'test', only test the model."
                              "When phase is 'analysis', only analysis the model.")
     parser.add_argument("--download-dataset-only", type=str, default= "False",choices=["True","False"], help="Set True if you only want to download pre-transformed dataset.")

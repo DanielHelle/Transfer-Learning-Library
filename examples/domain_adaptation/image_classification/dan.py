@@ -57,6 +57,10 @@ def main(args: argparse.Namespace):
 
     train_source_dataset, train_target_dataset, val_dataset, test_dataset, num_classes, args.class_names = \
         utils.get_dataset(args.data, args.root, args.source, args.target, train_transform, val_transform)
+    
+    if args.dataset_condensation == "True":
+        train_source_dataset = utils.get_condensed_source(args.data,args.source,args)
+
     train_source_loader = DataLoader(train_source_dataset, batch_size=args.batch_size,
                                      shuffle=True, num_workers=args.workers, drop_last=True)
     train_target_loader = DataLoader(train_target_dataset, batch_size=args.batch_size,
@@ -69,7 +73,7 @@ def main(args: argparse.Namespace):
 
     # create model
     print("=> using model '{}'".format(args.arch))
-    backbone = utils.get_model(args.arch, pretrain=not args.scratch)
+    backbone = utils.get_model(args.arch, pretrain=not args.scratch,args=args)
     pool_layer = nn.Identity() if args.no_pool else None
     classifier = ImageClassifier(backbone, num_classes, bottleneck_dim=args.bottleneck_dim,
                                  pool_layer=pool_layer, finetune=not args.scratch).to(device)
@@ -260,5 +264,10 @@ if __name__ == '__main__':
     parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis'],
                         help="When phase is 'test', only test the model."
                              "When phase is 'analysis', only analysis the model.")
+    parser.add_argument("--dataset-condensation",type=str, default= "False",choices=["True","False"], help="Toggle dataset condensation of source domain data. Set to True if you want to use condensed images, False otherwise.")
+    parser.add_argument("--condensed-data-path", type=str,default="none",help="Set absolut path of condensed data tensor")
+    parser.add_argument("--no-aug", type=str,default="False",help="Define if you want to do data augmentation")
+    parser.add_argument("--channel", type=int, default=3, help="Image channel size, default 3. Only needed to be set for convnet")
+    parser.add_argument("--convnet-weights-data-path", type=str,default="none",help="Set absolut path of convnet weights")
     args = parser.parse_args()
     main(args)

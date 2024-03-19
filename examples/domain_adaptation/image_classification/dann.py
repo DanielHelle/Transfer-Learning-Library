@@ -155,6 +155,11 @@ def main(args: argparse.Namespace):
 
         #print("A-distance average: =", A_distance)
         return
+    
+    if args.phase == 'test-5-fold':
+        mean_acc, std_acc = utils.validate_5_fold(test_loader, classifier, args, device)
+        print(f"Mean Accuracy: {mean_acc}, Standard Deviation: {std_acc}")
+        return
 
     if args.phase == 'test':
         acc1 = utils.validate(test_loader, classifier, args, device)
@@ -193,8 +198,10 @@ def main(args: argparse.Namespace):
 def train(train_source_iter: ForeverDataIterator, train_target_iter: ForeverDataIterator,
           model: ImageClassifier, domain_adv: DomainAdversarialLoss, optimizer: SGD,
           lr_scheduler: LambdaLR, epoch: int, args: argparse.Namespace):
-    batch_time = AverageMeter('Time', ':5.2f')
-    data_time = AverageMeter('Data', ':5.2f')
+    #batch_time = AverageMeter('Time', ':5.2f')
+    #data_time = AverageMeter('Data', ':5.2f')
+    batch_time = AverageMeter('Time', ':13.8f')
+    data_time = AverageMeter('Data', ':13.8f')
     losses = AverageMeter('Loss', ':6.2f')
     cls_accs = AverageMeter('Cls Acc', ':3.1f')
     domain_accs = AverageMeter('Domain Acc', ':3.1f')
@@ -211,8 +218,6 @@ def train(train_source_iter: ForeverDataIterator, train_target_iter: ForeverData
     for i in range(args.iters_per_epoch):
         x_s, labels_s = next(train_source_iter)[:2]
 
-       
-
         x_t, = next(train_target_iter)[:1]
 
         x_s = x_s.to(device)
@@ -224,8 +229,7 @@ def train(train_source_iter: ForeverDataIterator, train_target_iter: ForeverData
 
         # compute output
         x = torch.cat((x_s, x_t), dim=0)
-        #print(x.size())
-        #print(model)
+        
         y, f = model(x)
         y_s, y_t = y.chunk(2, dim=0)
         f_s, f_t = f.chunk(2, dim=0)
@@ -318,7 +322,7 @@ if __name__ == '__main__':
                         help='whether output per-class accuracy during evaluation')
     parser.add_argument("--log", type=str, default='dann',
                         help="Where to save logs, checkpoints and debugging images.")
-    parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis'],
+    parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis','test-5-fold'],
                         help="When phase is 'test', only test the model."
                              "When phase is 'analysis', only analysis the model.")
     parser.add_argument("--download-dataset-only", type=str, default= "False",choices=["True","False"], help="Set True if you only want to download pre-transformed dataset.")

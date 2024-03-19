@@ -9,6 +9,7 @@ import argparse
 import shutil
 import os.path as osp
 from typing import Tuple
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -125,6 +126,11 @@ def main(args: argparse.Namespace):
         '''
         avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
         print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
+        return
+    
+    if args.phase == 'test-5-fold':
+        mean_acc, std_acc = validate_5_fold(test_loader, G, F1, F2, args)
+        print(f"Mean Accuracy: {mean_acc}, Standard Deviation: {std_acc}")
         return
 
     if args.phase == 'test':
@@ -259,6 +265,56 @@ def train(train_source_iter: ForeverDataIterator, train_target_iter: ForeverData
             progress.display(i)
 
 
+def validate_5_fold(test_loader, G, F1, F2, args) -> float:
+
+    dataset = test_loader.dataset
+
+    # Print the original dataset size
+    original_size = len(dataset)
+    print(f"Original dataset size: {original_size}")
+
+    # Discard a sample if necessary before shuffling
+    if original_size % 5 != 0:
+        discard_samples = original_size % 5
+        new_size = original_size - discard_samples
+    else:
+        discard_samples = 0
+        new_size = original_size
+
+    # Print the new dataset size after discarding
+    print(f"Dataset size after discarding {discard_samples} sample(s): {new_size}")
+
+    partition_size = new_size // 5
+
+    # Ensure reproducibility
+    np.random.seed(0)
+    
+    # Randomly shuffle the dataset indices
+    indices = np.random.permutation(new_size)
+
+    accuracies = []
+
+    for i in range(5):
+        # Determine the indices for the validation set
+        val_indices = indices[i * partition_size:(i + 1) * partition_size]
+        
+        # Create the validation set
+        val_set = torch.utils.data.Subset(dataset, val_indices)
+        val_loader = torch.utils.data.DataLoader(val_set, batch_size=test_loader.batch_size, shuffle=False)
+        
+        # Validate the model
+        acc1, acc2 = validate(val_loader, G, F1, F2, args)
+        accuracies.append(max(acc1,acc2))
+        print(f"test_acc1_partition{i + 1}: {acc1}, {acc2}")
+
+    # Calculate and print the mean and standard deviation
+    mean_acc = np.mean(accuracies)
+    std_acc = np.std(accuracies)
+    
+
+    return mean_acc, std_acc
+
+
 def validate(val_loader: DataLoader, G: nn.Module, F1: ImageClassifierHead,
              F2: ImageClassifierHead, args: argparse.Namespace) -> Tuple[float, float]:
     batch_time = AverageMeter('Time', ':6.3f')
@@ -373,7 +429,7 @@ if __name__ == '__main__':
                         help='whether output per-class accuracy during evaluation')
     parser.add_argument("--log", type=str, default='mcd',
                         help="Where to save logs, checkpoints and debugging images.")
-    parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis'],
+    parser.add_argument("--phase", type=str, default='train', choices=['train', 'test', 'analysis','test-5-fold'],
                         help="When phase is 'test', only test the model."
                              "When phase is 'analysis', only analysis the model.")
     parser.add_argument("--dataset-condensation",type=str, default= "False",choices=["True","False"], help="Toggle dataset condensation of source domain data. Set to True if you want to use condensed images, False otherwise.")

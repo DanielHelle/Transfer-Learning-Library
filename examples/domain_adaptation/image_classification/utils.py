@@ -252,8 +252,26 @@ def compute_average_a_distance(source_loader, target_loader, feature_extractor, 
     return avg_a_distance, std_dev
 '''
 
+def a_distance_oversampling(source_loader, target_loader, feature_extractor, device,args):
+    source_dataset = source_loader.dataset
+    target_dataset = target_loader.dataset
+    oversample_train_factor = len(target_dataset) // len(source_dataset)
+   
+    if args.dataset_condensation == "True":
+       oversampled_source_dataset = ConcatDataset([target_loader] * oversample_train_factor)
+
+    oversampled_source_dataloader = DataLoader(oversampled_source_dataset, batch_size=32, shuffle=True)
+    target_shuffled_loader = DataLoader(target_dataset, batch_size=32, shuffle=True)
+
+    source_feature = collect_feature(oversampled_source_dataloader, feature_extractor, device)
+    target_feature = collect_feature(target_shuffled_loader, feature_extractor, device)
+
+    a_dist = a_distance.calculate(source_feature=source_feature,target_feature=target_feature,device=device,training_epochs=10)
+
+    return a_dist
+
 def compute_average_a_distance(source_loader, target_loader, feature_extractor, device,args, k=5):
-    
+
     num_source_images = len(source_loader.dataset)
     num_target_images = len(target_loader.dataset)
     
@@ -307,9 +325,10 @@ def compute_average_a_distance(source_loader, target_loader, feature_extractor, 
         A_distance = calculate(train_source_feature,val_source_feature, train_target_feature,val_target_feature, device, True)
         a_distances.append(A_distance.cpu())
 
-        # You can also calculate A-distance or any other metric for the validation features here if needed
+       
 
     # Calculate average and standard deviation of A-distance over all training partitions
+    print("A-distances: ", a_distances)
     avg_a_distance = np.mean(a_distances)
     std_dev = np.std(a_distances)
     
@@ -529,6 +548,59 @@ def get_dataset(dataset_name, root, source, target, train_source_transform, val_
     else:
         raise NotImplementedError(dataset_name)
     return train_source_dataset, train_target_dataset, val_dataset, test_dataset, num_classes, class_names
+
+def validate_5_fold(test_loader,model,args,device) -> float:
+
+    dataset = test_loader.dataset
+
+    # Print the original dataset size
+    original_size = len(dataset)
+    print(f"Original dataset size: {original_size}")
+
+    # Discard a sample if necessary before shuffling
+    if original_size % 5 != 0:
+        discard_samples = original_size % 5
+        new_size = original_size - discard_samples
+    else:
+        discard_samples = 0
+        new_size = original_size
+
+    # Print the new dataset size after discarding
+    print(f"Dataset size after discarding {discard_samples} sample(s): {new_size}")
+
+    partition_size = new_size // 5
+
+    # Ensure reproducibility
+    np.random.seed(0)
+    
+    # Randomly shuffle the dataset indices
+    indices = np.random.permutation(new_size)
+
+    accuracies = []
+
+    for i in range(5):
+        # Determine the indices for the validation set
+        val_indices = indices[i * partition_size:(i + 1) * partition_size]
+        
+        # Create the validation set
+        val_set = torch.utils.data.Subset(dataset, val_indices)
+        val_loader = torch.utils.data.DataLoader(val_set, batch_size=test_loader.batch_size, shuffle=False)
+        
+        # Validate the model
+        acc1 = validate(val_loader, model, args, device)
+        accuracies.append(acc1)
+        print(f"test_acc1_partition{i + 1}: {acc1}")
+
+    # Calculate and print the mean and standard deviation
+    mean_acc = np.mean(accuracies)
+    std_acc = np.std(accuracies)
+    
+
+    return mean_acc, std_acc
+
+
+
+
 
 
 def validate(val_loader, model, args, device) -> float:

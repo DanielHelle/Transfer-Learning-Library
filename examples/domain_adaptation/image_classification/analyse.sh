@@ -1,3 +1,5 @@
+#Outputs A-distance values over 5 partitions
+
 #DANN
 #USPS 1ipc --> MNIST
 

@@ -1,0 +1,113 @@
+   5 Fold A dist 10ipc values:
+
+DANN {
+A-distances:  [tensor(0.0723), tensor(0.1615), tensor(0.2720), tensor(0.4618), tensor(0.6705)]
+Average A-distance = 0.32763323187828064, Standard Deviation = 0.21514669060707092
+}
+
+MCD{
+A-distances:  [tensor(2.), tensor(2.), tensor(1.9997), tensor(1.9998), tensor(1.9998)]
+Average A-distance = 1.9998667240142822, Standard Deviation = 0.0001247128820978105
+}
+
+JAN {
+A-distances:  [tensor(1.0913), tensor(0.1915), tensor(0.3950), tensor(0.1950), tensor(0.6907)]
+Average A-distance = 0.5126999020576477, Standard Deviation = 0.3418901860713959
+}
+
+MCC {
+A-distances:  [tensor(1.), tensor(0.8000), tensor(1.2000), tensor(0.2998), tensor(1.)]
+Average A-distance = 0.8599666357040405, Standard Deviation = 0.30730655789375305
+}
+
+CDAN {
+A-distances:  [tensor(0.4850), tensor(0.0847), tensor(0.1875), tensor(0.8833), tensor(0.5858)]
+Average A-distance = 0.44526663422584534, Standard Deviation = 0.2862573564052582
+
+}
+
+
+5 Fold A dist baseline values:
+DANN Baseline {
+A-distances:  [tensor(1.7992), tensor(1.7810), tensor(1.7995), tensor(1.7813), tensor(1.7925)]
+Average A-distance = 1.7906728982925415, Standard Deviation = 0.008204074576497078
+}
+
+MCD Baseline{
+A-distances:  [tensor(1.6458), tensor(1.6458), tensor(1.6458), tensor(1.6458), tensor(1.6458)]
+Average A-distance = 1.645754098892212, Standard Deviation = 0.0
+}
+
+JAN Baseline{
+A-distances:  [tensor(1.6725), tensor(1.6691), tensor(1.6643), tensor(1.6418), tensor(1.6728)]
+Average A-distance = 1.6641042232513428, Standard Deviation = 0.011563426814973354
+}
+
+MCC Baseline{
+A-distances:  [tensor(1.9997), tensor(1.9997), tensor(2.), tensor(1.9991), tensor(1.9997)]
+Average A-distance = 1.9996353387832642, Standard Deviation = 0.0002977543917950243
+}
+
+CDAN Baseline{
+A-distances:  [tensor(1.7014), tensor(1.6980), tensor(1.6962), tensor(1.7032), tensor(1.6989)]
+Average A-distance = 1.6995289325714111, Standard Deviation = 0.0024681431241333485
+}
+
+
+
+
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   OLD Values:
+   
+    \begin{tabularx}{\linewidth}{|c|*{2}{>{\centering\arraybackslash}X|}}
+        \hline
+        \multirow{2}{*}{Algorithm} & \multicolumn{2}{c|}{Condensation Level} \\
+        \cline{2-3}
+         & Source Baseline & 10ipc \\
+        \hline
+        DANN & 1.79067 \pm 0.00820 & 0.32763 \pm 0.21515  \\
+        \hline
+        MCD & 1.64575 \pm 0.0 &1.99987 \pm 0.00012 \\
+        \hline
+        JAN & 1.66410 \pm 0.01156 & 0.51270 \pm  0.34189  \\
+        \hline
+        MCC & 1.99963 \pm 0.00030 & 0.85997 \pm 0.30731 \\
+        \hline
+        CDAN & 1.69953 \pm 0.00247 & 0.44527 \pm 0.28626  \\
+        \hline
+    \end{tabularx}
+
+

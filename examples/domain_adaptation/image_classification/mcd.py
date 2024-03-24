@@ -124,8 +124,10 @@ def main(args: argparse.Namespace):
         A_distance = a_distance.calculate(source_feature, target_feature, device)
         print("A-distance =", A_distance)
         '''
-        avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
-        print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
+        #avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
+        #print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
+        avg_A_distance = utils.a_distance_oversampling(train_source_loader, train_target_loader, feature_extractor, device,args)
+        print("A-distance average: =", avg_A_distance)
         return
     
     if args.phase == 'test-5-fold':
@@ -317,7 +319,7 @@ def validate_5_fold(test_loader, G, F1, F2, args) -> float:
 
 def validate(val_loader: DataLoader, G: nn.Module, F1: ImageClassifierHead,
              F2: ImageClassifierHead, args: argparse.Namespace) -> Tuple[float, float]:
-    batch_time = AverageMeter('Time', ':6.3f')
+    batch_time = AverageMeter('Time', ':13.8f')
     top1_1 = AverageMeter('Acc_1', ':6.2f')
     top1_2 = AverageMeter('Acc_2', ':6.2f')
     progress = ProgressMeter(

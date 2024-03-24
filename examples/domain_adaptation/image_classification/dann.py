@@ -150,10 +150,12 @@ def main(args: argparse.Namespace):
         # calculate A-distance, which is a measure for distribution discrepancy
         #A_distance = a_distance.calculate(source_feature, target_feature, device)
         
-        avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
-        print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
+        #avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
+        #print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
+        avg_A_distance = utils.a_distance_oversampling(train_source_loader, train_target_loader, feature_extractor, device,args)
 
-        #print("A-distance average: =", A_distance)
+
+        print("A-distance average: =", avg_A_distance)
         return
     
     if args.phase == 'test-5-fold':

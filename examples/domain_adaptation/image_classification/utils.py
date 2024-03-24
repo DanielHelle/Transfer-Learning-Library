@@ -258,7 +258,7 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
     oversample_train_factor = len(target_dataset) // len(source_dataset)
    
     if args.dataset_condensation == "True":
-       oversampled_source_dataset = ConcatDataset([target_loader] * oversample_train_factor)
+       oversampled_source_dataset = ConcatDataset([source_dataset] * oversample_train_factor)
 
     oversampled_source_dataloader = DataLoader(oversampled_source_dataset, batch_size=32, shuffle=True)
     target_shuffled_loader = DataLoader(target_dataset, batch_size=32, shuffle=True)

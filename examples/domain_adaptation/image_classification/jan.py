@@ -132,8 +132,11 @@ def main(args: argparse.Namespace):
         A_distance = a_distance.calculate(source_feature, target_feature, device)
         print("A-distance =", A_distance)
         '''
-        avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
-        print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
+        #avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
+        #print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
+
+        avg_A_distance = utils.a_distance_oversampling(train_source_loader, train_target_loader, feature_extractor, device,args)
+        print("A-distance average: =", avg_A_distance)
         return
 
     if args.phase == 'test':
@@ -175,8 +178,8 @@ def main(args: argparse.Namespace):
 def train(train_source_iter: ForeverDataIterator, train_target_iter: ForeverDataIterator, model: ImageClassifier,
           jmmd_loss: JointMultipleKernelMaximumMeanDiscrepancy, optimizer: SGD,
           lr_scheduler: LambdaLR, epoch: int, args: argparse.Namespace):
-    batch_time = AverageMeter('Time', ':4.2f')
-    data_time = AverageMeter('Data', ':3.1f')
+    batch_time = AverageMeter('Time', ':13.8f')
+    data_time = AverageMeter('Data', ':13.8f')
     losses = AverageMeter('Loss', ':3.2f')
     trans_losses = AverageMeter('Trans Loss', ':5.4f')
     cls_accs = AverageMeter('Cls Acc', ':3.1f')

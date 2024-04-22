@@ -23,6 +23,18 @@ from tllib.utils.analysis import collect_feature, tsne, a_distance
 from torch.utils.data import Dataset, ConcatDataset,Subset
 from torch.utils.data import DataLoader
 
+import tllib.vision.datasets as datasets
+import tllib.vision.models as models
+import custom_model
+#import tllib.vision.models.cnn as cnn
+from tllib.vision.transforms import ResizeImage
+from tllib.utils.metric import accuracy, ConfusionMatrix, binary_accuracy
+from tllib.utils.meter import AverageMeter, ProgressMeter
+from tllib.vision.datasets.imagelist import MultipleDomainsDataset
+
+from torch.utils.data import TensorDataset
+from torch.optim import SGD
+
 from sklearn.cluster import KMeans
 from collections import defaultdict, Counter
 
@@ -110,22 +122,7 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
     
     return a_dist
 
-
-
-
 sys.path.append('../../..')
-import tllib.vision.datasets as datasets
-import tllib.vision.models as models
-import custom_model
-#import tllib.vision.models.cnn as cnn
-from tllib.vision.transforms import ResizeImage
-from tllib.utils.metric import accuracy, ConfusionMatrix, binary_accuracy
-from tllib.utils.meter import AverageMeter, ProgressMeter
-from tllib.vision.datasets.imagelist import MultipleDomainsDataset
-
-from torch.utils.data import TensorDataset
-from torch.optim import SGD
-
 
 class ANet(nn.Module):
     def __init__(self, in_feature):
@@ -230,6 +227,8 @@ def calculate(train_source_feature: torch.Tensor, val_source_feature: torch.Tens
     return a_distance
 
 
+
+'''
 def a_distance_oversampling(source_loader, target_loader, feature_extractor, device,args):
     source_dataset = source_loader.dataset
     target_dataset = target_loader.dataset
@@ -251,7 +250,7 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
         target_feature = collect_feature(target_shuffled_loader, feature_extractor, device)
         a_dist = a_distance.calculate(source_feature=source_feature,target_feature=target_feature,device=device,training_epochs=10)
     return a_dist
-
+'''
 
 
 

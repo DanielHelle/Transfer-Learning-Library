@@ -258,16 +258,20 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
     oversample_train_factor = len(target_dataset) // len(source_dataset)
    
     if args.dataset_condensation == "True":
-       oversampled_source_dataset = ConcatDataset([source_dataset] * oversample_train_factor)
+        oversampled_source_dataset = ConcatDataset([source_dataset] * oversample_train_factor)
+        oversampled_source_dataloader = DataLoader(oversampled_source_dataset, batch_size=32, shuffle=True)
+        target_shuffled_loader = DataLoader(target_dataset, batch_size=32, shuffle=True)
 
-    oversampled_source_dataloader = DataLoader(oversampled_source_dataset, batch_size=32, shuffle=True)
-    target_shuffled_loader = DataLoader(target_dataset, batch_size=32, shuffle=True)
+        source_feature = collect_feature(oversampled_source_dataloader, feature_extractor, device)
+        target_feature = collect_feature(target_shuffled_loader, feature_extractor, device)
+        a_dist = a_distance.calculate(source_feature=source_feature,target_feature=target_feature,device=device,training_epochs=10)
 
-    source_feature = collect_feature(oversampled_source_dataloader, feature_extractor, device)
-    target_feature = collect_feature(target_shuffled_loader, feature_extractor, device)
-
-    a_dist = a_distance.calculate(source_feature=source_feature,target_feature=target_feature,device=device,training_epochs=10)
-
+    else:
+        source_dataloader = DataLoader(oversampled_source_dataset, batch_size=32, shuffle=True)
+        target_shuffled_loader = DataLoader(target_dataset, batch_size=32, shuffle=True)
+        source_feature = collect_feature(source_dataloader, feature_extractor, device)
+        target_feature = collect_feature(target_shuffled_loader, feature_extractor, device)
+        a_dist = a_distance.calculate(source_feature=source_feature,target_feature=target_feature,device=device,training_epochs=10)
     return a_dist
 
 def compute_average_a_distance(source_loader, target_loader, feature_extractor, device,args, k=5):

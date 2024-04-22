@@ -10,7 +10,6 @@ from PIL import Image
 import pickle
 import numpy as np
 import random
-
 import numpy as np
 
 
@@ -21,10 +20,97 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 from timm.data.auto_augment import auto_augment_transform, rand_augment_transform
 from tllib.utils.analysis import collect_feature, tsne, a_distance
-
-
 from torch.utils.data import Dataset, ConcatDataset,Subset
 from torch.utils.data import DataLoader
+
+from sklearn.cluster import KMeans
+from collections import defaultdict, Counter
+
+def stratified_cluster_sampling(features, labels, target_per_class_counts, n_clusters=10):
+    # Cluster the data
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42).fit(features)
+    cluster_labels = kmeans.labels_
+    centroids = kmeans.cluster_centers_
+
+    # Organize data by clusters
+    clusters = defaultdict(list)
+    for idx, cluster_label in enumerate(cluster_labels):
+        clusters[cluster_label].append(idx)
+
+    selected_indices = []
+    # Process each cluster
+    for cluster_id, indices in clusters.items():
+        # Determine the majority label in the cluster
+        cluster_labels = labels[indices]
+        label_counts = Counter(cluster_labels)
+        majority_label, _ = label_counts.most_common(1)[0]
+
+        # Select samples corresponding to the majority label that are closest to the centroid
+        majority_indices = [idx for idx in indices if labels[idx] == majority_label]
+        if not majority_indices:
+            continue
+
+        cluster_features = features[majority_indices]
+        centroid = centroids[cluster_id]
+        distances = np.linalg.norm(cluster_features - centroid, axis=1)
+        sorted_indices = np.argsort(distances)
+
+        count_needed = target_per_class_counts.get(majority_label, 0)
+        selected_for_cluster = [majority_indices[i] for i in sorted_indices[:count_needed]]
+        selected_indices.extend(selected_for_cluster)
+
+    return selected_indices
+
+def extract_features(data_loader, feature_extractor, device):
+    features = []
+    labels = []
+    feature_extractor.eval()
+    with torch.no_grad():
+        for inputs, targets in data_loader:
+            inputs = inputs.to(device)
+            extracted_features = feature_extractor(inputs).cpu().numpy()
+            features.append(extracted_features)
+            labels.append(targets.numpy())
+    features = np.concatenate(features, axis=0)
+    labels = np.concatenate(labels, axis=0)
+    return features, labels
+
+def a_distance_oversampling(source_loader, target_loader, feature_extractor, device, args):
+    source_dataset = source_loader.dataset
+    target_dataset = target_loader.dataset
+    
+    source_loader_for_features = DataLoader(source_dataset, batch_size=32, shuffle=False)
+    target_loader_for_features = DataLoader(target_dataset, batch_size=32, shuffle=False)
+    
+    source_features, source_labels = extract_features(source_loader_for_features, feature_extractor, device)
+    target_features, target_labels = extract_features(target_loader_for_features, feature_extractor, device)
+
+    # Calculate per class counts from source dataset as reference
+    unique_labels, counts = np.unique(source_labels, return_counts=True)
+    source_class_count = dict(zip(unique_labels, counts))
+
+    if args.dataset_condensation == "True":
+        # Apply stratified clustering only to target dataset
+        target_indices = stratified_cluster_sampling(target_features, target_labels, source_class_count)
+        adapted_target_dataset = Subset(target_dataset, target_indices)
+    else:
+        # Apply stratified clustering to both datasets
+        source_indices = stratified_cluster_sampling(source_features, source_labels, source_class_count)
+        target_indices = stratified_cluster_sampling(target_features, target_labels, source_class_count)
+        adapted_source_dataset = Subset(source_dataset, source_indices)
+        adapted_target_dataset = Subset(target_dataset, target_indices)
+
+    adapted_source_loader = DataLoader(adapted_source_dataset, batch_size=32, shuffle=True)
+    adapted_target_loader = DataLoader(adapted_target_dataset, batch_size=32, shuffle=True)
+    
+    source_feature = collect_feature(adapted_source_loader, feature_extractor, device)
+    target_feature = collect_feature(adapted_target_loader, feature_extractor, device)
+    
+    a_dist = a_distance.calculate(source_feature=source_feature, target_feature=target_feature, device=device, training_epochs=10)
+    
+    return a_dist
+
+
 
 
 sys.path.append('../../..')
@@ -53,81 +139,6 @@ class ANet(nn.Module):
         return x
 
 #train_source_feature,val_source_feature, train_target_feature,val_target_feature,
-
-'''
-def calculate(source_feature: torch.Tensor,val_source_feature:torch.Tensor, target_feature: torch.Tensor,val_target_feature: torch.Tensor,
-              device, progress=True, training_epochs=15, patience=2):
-    
-    source_label = torch.ones((source_feature.shape[0], 1))
-    target_label = torch.zeros((target_feature.shape[0], 1))
-    feature = torch.cat([source_feature, target_feature], dim=0)
-    label = torch.cat([source_label, target_label], dim=0)
-
-    dataset = TensorDataset(feature, label)
-    length = len(dataset)
-    train_size = int(0.8 * length)
-    val_size = length - train_size
-    train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
-    train_loader = DataLoader(train_set, batch_size=2, shuffle=True)
-    val_loader = DataLoader(val_set, batch_size=8, shuffle=False)
-
-    anet = ANet(feature.shape[1]).to(device)
-    optimizer = SGD(anet.parameters(), lr=0.01)
-    a_distance = 2.0
-    
-    best_val_loss = float('inf')
-    patience_counter = 0
-
-    for epoch in range(training_epochs):
-        anet.train()
-        for (x, label) in train_loader:
-            x = x.to(device)
-            label = label.to(device)
-            anet.zero_grad()
-            y = anet(x)
-            loss = F.binary_cross_entropy(y, label)
-            loss.backward()
-            optimizer.step()
-
-        anet.eval()
-        meter = AverageMeter("accuracy", ":4.2f")
-        source_val_loss = 0.0
-        source_samples = 0
-        with torch.no_grad():
-            for (x, label) in val_loader:
-                x = x.to(device)
-                label = label.to(device)
-                y = anet(x)
-                acc = binary_accuracy(y, label)
-                meter.update(acc, x.shape[0])
-                
-                # Calculate validation loss for source samples
-                if label.sum().item() > 0:  # If there are source samples in the batch
-                    source_loss = F.binary_cross_entropy(y[label == 1], label[label == 1])
-                    source_val_loss += source_loss.item() * label[label == 1].shape[0]
-                    source_samples += label[label == 1].shape[0]
-
-        source_val_loss /= source_samples
-
-        if progress:
-            print("epoch {} accuracy: {} A-dist: {} Source Val Loss: {}".format(epoch, meter.avg, a_distance, source_val_loss))
-
-        # Check for overfitting on source samples
-        if source_val_loss < best_val_loss:
-            best_val_loss = source_val_loss
-            patience_counter = 0
-        else:
-            patience_counter += 1
-
-        if patience_counter >= patience:
-            print("Early stopping due to overfitting on source samples.")
-            break
-
-        error = 1 - meter.avg / 100
-        a_distance = 2 * (1 - 2 * error)
-
-    return a_distance
-'''
 
 def calculate(train_source_feature: torch.Tensor, val_source_feature: torch.Tensor,
               train_target_feature: torch.Tensor, val_target_feature: torch.Tensor,
@@ -218,39 +229,6 @@ def calculate(train_source_feature: torch.Tensor, val_source_feature: torch.Tens
 
     return a_distance
 
-'''
-def compute_average_a_distance(source_loader, target_loader, feature_extractor, device, iterations=5):
-
-    num_source_images = len(source_loader.dataset)
-    num_target_images = len(target_loader.dataset)
-
-    # Repeat source dataset to match the size of target dataset
-    repeat_factor = num_target_images // num_source_images + (1 if num_target_images % num_source_images else 0)
-    repeated_source_dataset = ConcatDataset([source_loader.dataset] * repeat_factor)
-    
-    source_rep_dataloader = DataLoader(repeated_source_dataset,batch_size=32,shuffle=True)
-    target_loader = DataLoader(target_loader.dataset,batch_size=32,shuffle=True)
-    print("num_source_images",len(source_rep_dataloader))
-    print("num_target_images",len(target_loader))
-    a_distances = []
-    for _ in range(iterations):
-        # Randomly sample data from target_loader
-
-        source_feature = collect_feature(source_rep_dataloader, feature_extractor, device)
-        
-        target_feature = collect_feature(target_loader, feature_extractor, device)
-        print("SOURCE FEATURE SIZE:",target_feature.size())
-        
-        print("TARGET FEATURE SIZE: ", target_feature.size())
-        
-        A_distance = calculate(source_feature, target_feature, device, True)
-        a_distances.append(A_distance.cpu())
-        
-    # Calculate average and standard deviation of A-distance over all iterations
-    avg_a_distance = np.mean(a_distances)
-    std_dev = np.std(a_distances)
-    return avg_a_distance, std_dev
-'''
 
 def a_distance_oversampling(source_loader, target_loader, feature_extractor, device,args):
     source_dataset = source_loader.dataset
@@ -273,6 +251,10 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
         target_feature = collect_feature(target_shuffled_loader, feature_extractor, device)
         a_dist = a_distance.calculate(source_feature=source_feature,target_feature=target_feature,device=device,training_epochs=10)
     return a_dist
+
+
+
+
 
 def compute_average_a_distance(source_loader, target_loader, feature_extractor, device,args, k=5):
 

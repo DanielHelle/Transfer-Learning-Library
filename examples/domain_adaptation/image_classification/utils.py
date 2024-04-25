@@ -36,6 +36,7 @@ from torch.utils.data import TensorDataset
 from torch.optim import SGD
 
 from sklearn.cluster import KMeans
+from sklearn.model_selection import train_test_split
 from collections import defaultdict, Counter
 
 def stratified_cluster_sampling(features, labels, target_per_class_counts, n_clusters=10):
@@ -134,8 +135,148 @@ class ANet(nn.Module):
         x = self.layer(x)
         x = self.sigmoid(x)
         return x
+    
+def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Tensor, device, training_epochs=10, progress=True):
+    """
+    Calculate the A-distance using stratified splits for training and validation, maintaining the original loss calculation method.
+
+    Args:
+        source_feature (torch.Tensor): Features from source domain.
+        target_feature (torch.Tensor): Features from target domain.
+        device (torch.device): Device to run the calculations on (CPU/GPU).
+        training_epochs (int): Number of epochs to train the classifier.
+        progress (bool): Whether to display progress.
+
+    Returns:
+        float: Calculated A-distance.
+    """
+    # Combine features and create labels
+    source_label = torch.ones(source_feature.shape[0], 1)
+    target_label = torch.zeros(target_feature.shape[0], 1)
+    features = torch.cat([source_feature, target_feature], dim=0)
+    labels = torch.cat([source_label, target_label], dim=0)
+
+    # Stratified split into training and validation sets
+    train_features, val_features, train_labels, val_labels = train_test_split(
+        features, labels, test_size=0.2, stratify=labels, random_state=42
+    )
+
+    # Create DataLoaders
+    train_dataset = TensorDataset(train_features, train_labels)
+    val_dataset = TensorDataset(val_features, val_labels)
+    train_loader = DataLoader(train_dataset, batch_size=max(1, len(train_dataset) // 10), shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=max(1, len(val_dataset) // 10), shuffle=False)
+
+    # Initialize the A-Net model
+    anet = ANet(features.shape[1]).to(device)
+    optimizer = torch.optim.SGD(anet.parameters(), lr=0.01)
+
+    # Train the model
+    for epoch in range(training_epochs):
+        anet.train()
+        for x, label in train_loader:
+            x, label = x.to(device), label.to(device)
+            optimizer.zero_grad()
+            y = anet(x)
+            loss = torch.nn.functional.binary_cross_entropy(torch.sigmoid(y), label)
+            loss.backward()
+            optimizer.step()
+
+        # Validate the model
+        anet.eval()
+        total = correct = 0
+        with torch.no_grad():
+            for x, label in val_loader:
+                x, label = x.to(device), label.to(device)
+                y = anet(x)
+                predicted = (torch.sigmoid(y) > 0.5).float()
+                correct += (predicted == label).sum().item()
+                total += label.size(0)
+
+        # Calculate accuracy and A-distance
+        accuracy = correct / total if total > 0 else 0
+        a_distance = 2 * (1 - 2 * accuracy)
+        if progress:
+            print(f"Epoch {epoch+1}: Accuracy = {accuracy:.4f}, A-distance = {a_distance:.4f}")
+
+    return a_distance
+
+    
+#A-distance without stratified sampling 
+
+'''
+def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Tensor,
+              device, progress=True, training_epochs=10):
+    """
+    Calculate the :math:`\mathcal{A}`-distance, which is a measure for distribution discrepancy.
+
+    The definition is :math:`dist_\mathcal{A} = 2 (1-2\epsilon)`, where :math:`\epsilon` is the
+    test error of a classifier trained to discriminate the source from the target.
+
+    Args:
+        source_feature (tensor): features from source domain in shape :math:`(minibatch, F)`
+        target_feature (tensor): features from target domain in shape :math:`(minibatch, F)`
+        device (torch.device)
+        progress (bool): if True, displays a the progress of training A-Net
+        training_epochs (int): the number of epochs when training the classifier
+
+    Returns:
+        :math:`\mathcal{A}`-distance
+    """
+    source_label = torch.ones((source_feature.shape[0], 1))
+    target_label = torch.zeros((target_feature.shape[0], 1))
+    feature = torch.cat([source_feature, target_feature], dim=0)
+    label = torch.cat([source_label, target_label], dim=0)
+
+    dataset = TensorDataset(feature, label)
+    length = len(dataset)
+    train_size = int(0.8 * length)
+    val_size = length - train_size
+    train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
+    train_loader = DataLoader(train_set, batch_size=2, shuffle=True)
+    val_loader = DataLoader(val_set, batch_size=8, shuffle=False)
+
+    anet = ANet(feature.shape[1]).to(device)
+    optimizer = SGD(anet.parameters(), lr=0.01)
+    a_distance = 2.0
+    for epoch in range(training_epochs):
+        anet.train()
+        for (x, label) in train_loader:
+            x = x.to(device)
+            label = label.to(device)
+            anet.zero_grad()
+            y = anet(x)
+            loss = F.binary_cross_entropy(y, label)
+            loss.backward()
+            optimizer.step()
+
+        anet.eval()
+        meter = AverageMeter("accuracy", ":4.2f")
+        source_samples = 0
+        with torch.no_grad():
+            for (x, label) in val_loader:
+                x = x.to(device)
+                label = label.to(device)
+                y = anet(x)
+                acc = binary_accuracy(y, label)
+                meter.update(acc, x.shape[0])
+                # Calculate validation loss for source samples
+                if label.sum().item() > 0:  # If there are source samples in the batch
+                    source_loss = F.binary_cross_entropy(y[label == 1], label[label == 1])
+                    source_val_loss += source_loss.item() * label[label == 1].shape[0]
+                    source_samples += label[label == 1].shape[0]
+                    
+        error = 1 - meter.avg / 100
+        a_distance = 2 * (1 - 2 * error)
+        if progress:
+            print("epoch {} accuracy: {} A-dist: {}".format(epoch, meter.avg, a_distance))
+
+    return a_distance
+
+'''
 
 #train_source_feature,val_source_feature, train_target_feature,val_target_feature,
+
 
 def calculate(train_source_feature: torch.Tensor, val_source_feature: torch.Tensor,
               train_target_feature: torch.Tensor, val_target_feature: torch.Tensor,

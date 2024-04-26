@@ -39,9 +39,9 @@ from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
 from collections import defaultdict, Counter
 
-def stratified_cluster_sampling(features, labels, target_per_class_counts, n_clusters=10):
+def stratified_cluster_sampling(features, labels, target_per_class_counts, k, n_clusters=10):
     # Cluster the data
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42).fit(features)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=k).fit(features)
     cluster_labels = kmeans.labels_
     centroids = kmeans.cluster_centers_
 
@@ -88,7 +88,7 @@ def extract_features(data_loader, feature_extractor, device):
     labels = np.concatenate(labels, axis=0)
     return features, labels
 
-def a_distance_oversampling(source_loader, target_loader, feature_extractor, device, args):
+def a_distance_oversampling(source_loader, target_loader, feature_extractor, device, args, iterations):
     source_dataset = source_loader.dataset
     target_dataset = target_loader.dataset
     
@@ -101,27 +101,29 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
     # Calculate per class counts from source dataset as reference
     unique_labels, counts = np.unique(source_labels, return_counts=True)
     source_class_count = dict(zip(unique_labels, counts))
+    a_distances = []
+    for k in range(iterations):
+        if args.dataset_condensation == "True":
+            # Apply stratified clustering only to target dataset
+            target_indices = stratified_cluster_sampling(target_features, target_labels, source_class_count,k)
+            adapted_target_dataset = Subset(target_dataset, target_indices)
+        else:
+            # Apply stratified clustering to both datasets
+            source_indices = stratified_cluster_sampling(source_features, source_labels, source_class_count,k)
+            target_indices = stratified_cluster_sampling(target_features, target_labels, source_class_count,k)
+            adapted_source_dataset = Subset(source_dataset, source_indices)
+            adapted_target_dataset = Subset(target_dataset, target_indices)
 
-    if args.dataset_condensation == "True":
-        # Apply stratified clustering only to target dataset
-        target_indices = stratified_cluster_sampling(target_features, target_labels, source_class_count)
-        adapted_target_dataset = Subset(target_dataset, target_indices)
-    else:
-        # Apply stratified clustering to both datasets
-        source_indices = stratified_cluster_sampling(source_features, source_labels, source_class_count)
-        target_indices = stratified_cluster_sampling(target_features, target_labels, source_class_count)
-        adapted_source_dataset = Subset(source_dataset, source_indices)
-        adapted_target_dataset = Subset(target_dataset, target_indices)
-
-    adapted_source_loader = DataLoader(adapted_source_dataset, batch_size=32, shuffle=True)
-    adapted_target_loader = DataLoader(adapted_target_dataset, batch_size=32, shuffle=True)
+        adapted_source_loader = DataLoader(adapted_source_dataset, batch_size=32, shuffle=True)
+        adapted_target_loader = DataLoader(adapted_target_dataset, batch_size=32, shuffle=True)
+        
+        source_feature = collect_feature(adapted_source_loader, feature_extractor, device)
+        target_feature = collect_feature(adapted_target_loader, feature_extractor, device)
+        
+        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature, device=device, training_epochs=10,k=k)
+        a_distances.append(a_dist)
     
-    source_feature = collect_feature(adapted_source_loader, feature_extractor, device)
-    target_feature = collect_feature(adapted_target_loader, feature_extractor, device)
-    
-    a_dist = a_distance.calculate(source_feature=source_feature, target_feature=target_feature, device=device, training_epochs=10)
-    
-    return a_dist
+    return sum(a_distances)/len(a_distances)
 
 sys.path.append('../../..')
 
@@ -136,7 +138,7 @@ class ANet(nn.Module):
         x = self.sigmoid(x)
         return x
     
-def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Tensor, device, training_epochs=10, progress=True):
+def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Tensor, device,k, training_epochs=10, progress=True):
     """
     Calculate the A-distance using stratified splits for training and validation, maintaining the original loss calculation method.
 
@@ -167,37 +169,35 @@ def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Ten
     train_loader = DataLoader(train_dataset, batch_size=max(1, len(train_dataset) // 10), shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=max(1, len(val_dataset) // 10), shuffle=False)
 
-    # Initialize the A-Net model
     anet = ANet(features.shape[1]).to(device)
-    optimizer = torch.optim.SGD(anet.parameters(), lr=0.01)
-
-    # Train the model
+    optimizer = SGD(anet.parameters(), lr=0.01)
+    a_distance = 2.0
     for epoch in range(training_epochs):
         anet.train()
-        for x, label in train_loader:
-            x, label = x.to(device), label.to(device)
-            optimizer.zero_grad()
+        for (x, label) in train_loader:
+            x = x.to(device)
+            label = label.to(device)
+            anet.zero_grad()
             y = anet(x)
-            loss = torch.nn.functional.binary_cross_entropy(torch.sigmoid(y), label)
+            loss = F.binary_cross_entropy(y, label)
             loss.backward()
             optimizer.step()
 
-        # Validate the model
         anet.eval()
-        total = correct = 0
+        meter = AverageMeter("accuracy", ":4.2f")
+        source_samples = 0
         with torch.no_grad():
-            for x, label in val_loader:
-                x, label = x.to(device), label.to(device)
+            for (x, label) in val_loader:
+                x = x.to(device)
+                label = label.to(device)
                 y = anet(x)
-                predicted = (torch.sigmoid(y) > 0.5).float()
-                correct += (predicted == label).sum().item()
-                total += label.size(0)
-
-        # Calculate accuracy and A-distance
-        accuracy = correct / total if total > 0 else 0
-        a_distance = 2 * (1 - 2 * accuracy)
+                acc = binary_accuracy(y, label)
+                meter.update(acc, x.shape[0])
+                    
+        error = 1 - meter.avg / 100
+        a_distance = 2 * (1 - 2 * error)
         if progress:
-            print(f"Epoch {epoch+1}: Accuracy = {accuracy:.4f}, A-distance = {a_distance:.4f}")
+            print("epoch {} accuracy: {} A-dist: {}".format(epoch, meter.avg, a_distance))
 
     return a_distance
 

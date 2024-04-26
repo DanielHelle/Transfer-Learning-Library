@@ -120,7 +120,7 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
         source_feature = collect_feature(adapted_source_loader, feature_extractor, device)
         target_feature = collect_feature(adapted_target_loader, feature_extractor, device)
         
-        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature, device=device, training_epochs=10,k=k)
+        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature,k=k, device=device, training_epochs=10,k=k)
         a_distances.append(a_dist)
     
     return sum(a_distances)/len(a_distances)
@@ -160,7 +160,7 @@ def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Ten
 
     # Stratified split into training and validation sets
     train_features, val_features, train_labels, val_labels = train_test_split(
-        features, labels, test_size=0.2, stratify=labels, random_state=42
+        features, labels, test_size=0.2, stratify=labels, random_state=k
     )
 
     # Create DataLoaders

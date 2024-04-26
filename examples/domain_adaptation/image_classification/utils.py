@@ -92,7 +92,7 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
     source_dataset = source_loader.dataset
     target_dataset = target_loader.dataset
     
-    source_loader_for_features = DataLoader(source_dataset, batch_size=32, shuffle=False)
+    source_loader_for_features = DataLoader(source_dataset, batch_size=2, shuffle=False)
     target_loader_for_features = DataLoader(target_dataset, batch_size=32, shuffle=False)
     
     source_features, source_labels = extract_features(source_loader_for_features, feature_extractor, device)
@@ -107,6 +107,7 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
             # Apply stratified clustering only to target dataset
             target_indices = stratified_cluster_sampling(target_features, target_labels, source_class_count,k)
             adapted_target_dataset = Subset(target_dataset, target_indices)
+            adapted_source_dataset = source_dataset
         else:
             # Apply stratified clustering to both datasets
             source_indices = stratified_cluster_sampling(source_features, source_labels, source_class_count,k)
@@ -114,13 +115,13 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
             adapted_source_dataset = Subset(source_dataset, source_indices)
             adapted_target_dataset = Subset(target_dataset, target_indices)
 
-        adapted_source_loader = DataLoader(adapted_source_dataset, batch_size=32, shuffle=True)
-        adapted_target_loader = DataLoader(adapted_target_dataset, batch_size=32, shuffle=True)
+        adapted_source_loader = DataLoader(adapted_source_dataset, batch_size=2, shuffle=True)
+        adapted_target_loader = DataLoader(adapted_target_dataset, batch_size=2, shuffle=True)
         
         source_feature = collect_feature(adapted_source_loader, feature_extractor, device)
         target_feature = collect_feature(adapted_target_loader, feature_extractor, device)
         
-        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature,k=k, device=device, training_epochs=10,k=k)
+        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature,k=k, device=device, training_epochs=10)
         a_distances.append(a_dist)
     
     return sum(a_distances)/len(a_distances)

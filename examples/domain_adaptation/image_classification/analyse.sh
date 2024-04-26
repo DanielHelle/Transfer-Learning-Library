@@ -5,7 +5,7 @@
 
 #CUDA_VISIBLE_DEVICES=0 python dann.py data/digits -d Digits -s USPS -t MNIST -a convnet -b 2 --seed 0 --epochs 40 --norm-mean 0.485 --norm-std 0.229 --resize-size 32 --train-resizing res. --val-resizing res. --log logs/dann/experiment/Digits_U2M/1ipc/ --dataset-condensation True --condensed-data-path /home/daniel/exjobb/DatasetCondensation/result/condensed_usps/1ipc/res_DC_pre_processed_usps_ConvNet_1ipc.pt --convnet-weights-data-path /home/daniel/exjobb/DatasetCondensation/result/condensed_usps/1ipc/state_dict_DC_pre_processed_usps_ConvNet_1ipc.pt --phase analysis
 
-
+#Perhaps rerun 10ipc dann below
 #USPS 10ipc --> MNSIT
 CUDA_VISIBLE_DEVICES=0 python dann.py data/digits -d Digits -s USPS -t MNIST -a convnet -b 3 --seed 0 --epochs 60 --norm-mean 0.485 --norm-std 0.229 --resize-size 32 --train-resizing res. --val-resizing res. --log logs/dann/experiment_new/Digits_U2M/10ipc/0/ --dataset-condensation True --condensed-data-path /home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/res_DC_pre_processed_usps_ConvNet_10ipc.pt --convnet-weights-data-path /home/daniel/exjobb/DatasetCondensation/result/condensed_usps/10ipc/state_dict_DC_pre_processed_usps_ConvNet_10ipc.pt --phase analysis
 
@@ -27,7 +27,6 @@ CUDA_VISIBLE_DEVICES=0 python dann.py data/digits -d Digits -s USPS -t MNIST -a 
 CUDA_VISIBLE_DEVICES=0 python dann.py data/digits -d Digits -s USPS -t MNIST -a convnet -b 32 --seed 3 --epochs 60 --partition-source 0.8 --norm-mean 0.485 --norm-std 0.229 --resize-size 32 --train-resizing res. --val-resizing res. --log logs/dann/experiment_baseline_new/Digits_U2M/3/ --phase analysis
 
 CUDA_VISIBLE_DEVICES=0 python dann.py data/digits -d Digits -s USPS -t MNIST -a convnet -b 32 --seed 4 --epochs 60 --partition-source 0.8 --norm-mean 0.485 --norm-std 0.229 --resize-size 32 --train-resizing res. --val-resizing res. --log logs/dann/experiment_baseline_new/Digits_U2M/4/ --phase analysis
-
 
 
 #CDAN

@@ -141,7 +141,20 @@ class ANet(nn.Module):
     
 def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Tensor, device,k, training_epochs=10, progress=True):
     """
-    Calculate the A-distance using stratified splits for training and validation, maintaining the original loss calculation method.
+    Calculate the :math:`\mathcal{A}`-distance, which is a measure for distribution discrepancy.
+
+    The definition is :math:`dist_\mathcal{A} = 2 (1-2\epsilon)`, where :math:`\epsilon` is the
+    test error of a classifier trained to discriminate the source from the target.
+
+    Args:
+        source_feature (tensor): features from source domain in shape :math:`(minibatch, F)`
+        target_feature (tensor): features from target domain in shape :math:`(minibatch, F)`
+        device (torch.device)
+        progress (bool): if True, displays a the progress of training A-Net
+        training_epochs (int): the number of epochs when training the classifier
+
+    Returns:
+        :math:`\mathcal{A}`-distance
 
     Args:
         source_feature (torch.Tensor): Features from source domain.

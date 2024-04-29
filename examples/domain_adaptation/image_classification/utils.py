@@ -34,6 +34,7 @@ from tllib.vision.datasets.imagelist import MultipleDomainsDataset
 
 from torch.utils.data import TensorDataset
 from torch.optim import SGD
+from torch.optim import Adam
 
 from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
@@ -100,7 +101,8 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
 
     # Calculate per class counts from source dataset as reference
     unique_labels, counts = np.unique(source_labels, return_counts=True)
-    source_class_count = dict(zip(unique_labels, counts))
+    #source_class_count = dict(zip(unique_labels, counts))
+    source_class_count = {0: 10, 1: 10, 2: 10, 3: 10, 4: 10, 5: 10, 6: 10, 7: 10, 8: 10, 9: 10}
     a_distances = []
     for k in range(iterations):
         if args.dataset_condensation == "True":
@@ -117,11 +119,18 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
 
         adapted_source_loader = DataLoader(adapted_source_dataset, batch_size=2, shuffle=True)
         adapted_target_loader = DataLoader(adapted_target_dataset, batch_size=2, shuffle=True)
+    
+        print("Dataset Condensation: ", args.dataset_condensation, "\n")
+        print("source_class count: ", source_class_count)
+        print("adapted source size: ", len(adapted_source_dataset), "\n")
+        #print(adapted_source_dataset)
+        print("adapted target size: ", len(adapted_target_dataset), "\n")
+        #print(adapted_target_dataset)
         
         source_feature = collect_feature(adapted_source_loader, feature_extractor, device)
         target_feature = collect_feature(adapted_target_loader, feature_extractor, device)
         
-        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature,k=k, device=device, training_epochs=10)
+        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature,k=k, device=device, training_epochs=2)
         a_distances.append(a_dist)
     
     return sum(a_distances)/len(a_distances)
@@ -138,6 +147,63 @@ class ANet(nn.Module):
         x = self.layer(x)
         x = self.sigmoid(x)
         return x
+    
+class ANet2(nn.Module):
+    def __init__(self, in_feature):
+        super(ANet2, self).__init__()
+        # First layer with 10 output neurons
+        self.layer1 = nn.Linear(in_feature, 10)
+        self.relu1 = nn.ReLU()
+        # Second layer reduces to 1 output neuron, suitable for binary classification
+        self.layer2 = nn.Linear(10, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.relu1(x)
+        x = self.layer2(x)
+        x = self.sigmoid(x)
+        return x
+    
+class ANet3(nn.Module):
+    def __init__(self, in_feature):
+        super(ANet3, self).__init__()
+        self.layer1 = nn.Linear(in_feature, 100)  # More neurons
+        self.relu1 = nn.ReLU()
+        self.dropout1 = nn.Dropout(0.5)  # Dropout added
+        self.layer2 = nn.Linear(100, 50)  # Additional layer
+        self.relu2 = nn.ReLU()
+        self.layer3 = nn.Linear(50, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.relu1(x)
+        x = self.dropout1(x)
+        x = self.layer2(x)
+        x = self.relu2(x)
+        x = self.layer3(x)
+        x = self.sigmoid(x)
+        return x
+    
+class ANet4(nn.Module):
+    def __init__(self, feature_dim):
+        super(ANet4, self).__init__()
+        self.net = nn.Sequential(
+            nn.Linear(feature_dim, 1024),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, 1),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        return self.net(x)
     
 def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Tensor, device,k, training_epochs=10, progress=True):
     """
@@ -180,11 +246,12 @@ def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Ten
     # Create DataLoaders
     train_dataset = TensorDataset(train_features, train_labels)
     val_dataset = TensorDataset(val_features, val_labels)
-    train_loader = DataLoader(train_dataset, batch_size=max(1, len(train_dataset) // 10), shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=max(1, len(val_dataset) // 10), shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=3, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=3, shuffle=False)
 
-    anet = ANet(features.shape[1]).to(device)
-    optimizer = SGD(anet.parameters(), lr=0.01)
+    anet = ANet4(features.shape[1]).to(device)
+    #optimizer = SGD(anet.parameters(), lr=0.01)
+    optimizer =  Adam(anet.parameters(),lr=0.01)
     a_distance = 2.0
     for epoch in range(training_epochs):
         anet.train()

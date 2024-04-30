@@ -135,7 +135,7 @@ def main(args: argparse.Namespace):
         #avg_A_distance, std_dev = utils.compute_average_a_distance(train_source_loader, train_target_loader, feature_extractor, device,args)
         #print(f"Average A-distance = {avg_A_distance}, Standard Deviation = {std_dev}")
 
-        avg_A_distance = utils.a_distance_oversampling(train_source_loader, train_target_loader, feature_extractor, device,args,10)
+        avg_A_distance = utils.a_distance_oversampling(train_source_loader, train_target_loader, feature_extractor, device,args,20)
         print("A-distance average: =", avg_A_distance)
         return
 

@@ -35,6 +35,7 @@ from tllib.vision.datasets.imagelist import MultipleDomainsDataset
 from torch.utils.data import TensorDataset
 from torch.optim import SGD
 from torch.optim import Adam
+from torch.optim.lr_scheduler import ExponentialLR
 
 from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
@@ -121,16 +122,16 @@ def a_distance_oversampling(source_loader, target_loader, feature_extractor, dev
         adapted_target_loader = DataLoader(adapted_target_dataset, batch_size=2, shuffle=True)
     
         print("Dataset Condensation: ", args.dataset_condensation, "\n")
-        print("source_class count: ", source_class_count)
+        #print("source_class count: ", source_class_count)
         print("adapted source size: ", len(adapted_source_dataset), "\n")
-        #print(adapted_source_dataset)
+        print(adapted_source_dataset)
         print("adapted target size: ", len(adapted_target_dataset), "\n")
-        #print(adapted_target_dataset)
+        print(adapted_target_dataset)
         
         source_feature = collect_feature(adapted_source_loader, feature_extractor, device)
         target_feature = collect_feature(adapted_target_loader, feature_extractor, device)
         
-        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature,k=k, device=device, training_epochs=2)
+        a_dist = calculate_a_distance(source_feature=source_feature, target_feature=target_feature,k=k, device=device, training_epochs=20)
         a_distances.append(a_dist)
     
     return sum(a_distances)/len(a_distances)
@@ -192,12 +193,12 @@ class ANet4(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(feature_dim, 1024),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.5),
             nn.Linear(1024, 512),
             nn.ReLU(),
             nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.5),
             nn.Linear(256, 1),
             nn.Sigmoid()
         )
@@ -238,10 +239,11 @@ def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Ten
     features = torch.cat([source_feature, target_feature], dim=0)
     labels = torch.cat([source_label, target_label], dim=0)
 
-    # Stratified split into training and validation sets
+    # Stratified split into training and validation sets  set stratify=labels?
     train_features, val_features, train_labels, val_labels = train_test_split(
-        features, labels, test_size=0.2, stratify=labels, random_state=k
+        features, labels, test_size=0.2,stratify=labels, random_state=k
     )
+    
 
     # Create DataLoaders
     train_dataset = TensorDataset(train_features, train_labels)
@@ -249,9 +251,10 @@ def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Ten
     train_loader = DataLoader(train_dataset, batch_size=3, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=3, shuffle=False)
 
-    anet = ANet4(features.shape[1]).to(device)
+    anet = ANet(features.shape[1]).to(device)
     #optimizer = SGD(anet.parameters(), lr=0.01)
     optimizer =  Adam(anet.parameters(),lr=0.01)
+    #scheduler = ExponentialLR(optimizer, gamma=0.8)
     a_distance = 2.0
     for epoch in range(training_epochs):
         anet.train()
@@ -263,6 +266,8 @@ def calculate_a_distance(source_feature: torch.Tensor, target_feature: torch.Ten
             loss = F.binary_cross_entropy(y, label)
             loss.backward()
             optimizer.step()
+        #if epoch % 10 == 0:
+        #    scheduler.step()
 
         anet.eval()
         meter = AverageMeter("accuracy", ":4.2f")
